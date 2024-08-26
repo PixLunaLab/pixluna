@@ -25,6 +25,7 @@
     "koishi": "^4.11.7"
   },
   "dependencies": {
+    "@andreekeberg/imagedata": "^1.0.2",
     "axios": "^1.7.5",
     "koishi": "^4.11.7"
   }

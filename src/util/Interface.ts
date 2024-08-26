@@ -39,3 +39,7 @@ export interface Lolicon {
     original: string
   }
 }
+
+export interface ImageConfusion extends Lolicon {
+  imgBase64: string;
+}

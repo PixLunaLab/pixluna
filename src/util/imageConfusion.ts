@@ -1,12 +1,18 @@
 interface imageConfusion {
   imageData: ImageData; // 图像数据
-  newX: number; // 新的 X 坐标
-  newY: number; // 新的 Y 坐标
 }
 
-export function imageConfusion(imageData: ImageData, newX: number, newY: number): ArrayBuffer {
+export function imageConfusion(imageData: ImageData): ArrayBuffer {
+
+  // 类型检查
+  if (!(imageData instanceof ImageData)) {
+    const type = typeof imageData;
+    throw new Error(`入参 imageData 类型错误。入参类型应该是：ImageData，实际类型却是：${type}`);
+  }
+
   const { width, height, data } = imageData;
   const lastPixelIndex = (width * (height - 1) + (width - 1)) * 4;
+  const leftPixelIndex = (width * (height - 1) + (width - 2)) * 4;
 
   // 获取右下角像素的 RGBA 值
   const r = data[lastPixelIndex];
@@ -14,26 +20,22 @@ export function imageConfusion(imageData: ImageData, newX: number, newY: number)
   const b = data[lastPixelIndex + 2];
   const a = data[lastPixelIndex + 3];
 
-  // 计算新像素的索引
-  const newPixelIndex = (newY * width + newX) * 4;
+  // 获取右下角左边一个像素的 RGBA 值
+  const leftR = data[leftPixelIndex];
+  const leftG = data[leftPixelIndex + 1];
+  const leftB = data[leftPixelIndex + 2];
+  const leftA = data[leftPixelIndex + 3];
 
-  // 获取目标位置像素的 RGBA 值
-  const targetR = data[newPixelIndex];
-  const targetG = data[newPixelIndex + 1];
-  const targetB = data[newPixelIndex + 2];
-  const targetA = data[newPixelIndex + 3];
+  // 交换右下角像素和左边一个像素的 RGBA 值
+  data[lastPixelIndex] = leftR;
+  data[lastPixelIndex + 1] = leftG;
+  data[lastPixelIndex + 2] = leftB;
+  data[lastPixelIndex + 3] = leftA;
 
-  // 设置新像素的 RGBA 值
-  data[newPixelIndex] = r;
-  data[newPixelIndex + 1] = g;
-  data[newPixelIndex + 2] = b;
-  data[newPixelIndex + 3] = a;
-
-  // 用目标位置的 RGBA 值填充原来的右下角像素
-  data[lastPixelIndex] = targetR;
-  data[lastPixelIndex + 1] = targetG;
-  data[lastPixelIndex + 2] = targetB;
-  data[lastPixelIndex + 3] = targetA;
+  data[leftPixelIndex] = r;
+  data[leftPixelIndex + 1] = g;
+  data[leftPixelIndex + 2] = b;
+  data[leftPixelIndex + 3] = a;
 
   // 返回 ArrayBuffer
   return data.buffer;

@@ -4,9 +4,11 @@ import { AxiosRequestConfig, Method } from "axios";
 
 export const name = '@q78kg/pixiv';
 
-import { Lolicon, Pixivic, Vilipix } from "./util/Interface";
+import { Lolicon, Pixivic, Vilipix, ImageConfusion } from "./util/Interface";
 
-import { imageConfusion } from "./util/imageConfusion"
+import { imageConfusion } from "./util/imageConfusion";
+
+import { get } from "@andreekeberg/imagedata";
 
 let date = new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
@@ -20,10 +22,6 @@ const pixivUrl = {
 
 let _config: Config;
 
-interface imageConfusion extends Lolicon {
-  imgBase64: string;
-}
-
 export function apply(ctx: Context, config: Config) {
   const logger = ctx.logger('pixiv');
   _config = config;
@@ -33,7 +31,7 @@ export function apply(ctx: Context, config: Config) {
     })
     .alias('色图')
     .action(async ({ session, options }, tag) => {
-      let image: imageConfusion;
+      let image: ImageConfusion;
       await session.send('不可以涩涩哦~');
       const messages = [];
       for (let i = 0; i < Math.min(10, options.n); i++) {
@@ -105,14 +103,15 @@ async function getPixivImage(ctx: Context, tag: string) {
     params['imageConfusion'] = true;
   }
 
-  let imgData = null;
-  let afterMove : ArrayBuffer = null;
   let imgBase64: String;
+  let imageData : ImageData = null;
   const res = await ctx.http.get(HttpUtil.setParams(pixivUrl.url, params), getAxiosConfig() as any);
   if (params['imageConfusion']) {
-    imgData = await ctx.http.get(res.data[0].urls.original, getAxiosConfig() as any);
-    afterMove = imageConfusion(imgData, 10, 10);
-    imgBase64 = arrayBufferToBase64(afterMove);
+    const imgData = await ctx.http.get(res.data[0].urls.original, {"responseType": "arraybuffer", ...getAxiosConfig() as any});
+    get(imgData, (err, data) => {
+      err ? imageData = data : console.error(err);
+    })
+    imgBase64 = arrayBufferToBase64(imageConfusion(imageData));
   }
   return params['imageConfusion'] ? { ...res.data[0], imgBase64 } : res.data[0];
 }
