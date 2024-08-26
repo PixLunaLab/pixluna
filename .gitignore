@@ -130,3 +130,6 @@ dist
 .pnp.*
 
 lib
+
+yarn.lock
+package-lock.json
