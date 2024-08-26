@@ -1,10 +1,12 @@
-import { Context, Random, Schema } from 'koishi';
+import { Context, Random, Schema, arrayBufferToBase64 } from 'koishi';
 import { HttpUtil } from "./util/HttpUtil";
 import { AxiosRequestConfig, Method } from "axios";
 
 export const name = '@q78kg/pixiv';
 
 import { Lolicon, Pixivic, Vilipix } from "./util/Interface";
+
+import { imageConfusion } from "./util/imageConfusion"
 
 let date = new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
@@ -18,6 +20,10 @@ const pixivUrl = {
 
 let _config: Config;
 
+interface imageConfusion extends Lolicon {
+  imgBase64: string;
+}
+
 export function apply(ctx: Context, config: Config) {
   const logger = ctx.logger('pixiv');
   _config = config;
@@ -27,7 +33,7 @@ export function apply(ctx: Context, config: Config) {
     })
     .alias('色图')
     .action(async ({ session, options }, tag) => {
-      let image: Lolicon;
+      let image: imageConfusion;
       await session.send('不可以涩涩哦~');
       const messages = [];
       for (let i = 0; i < Math.min(10, options.n); i++) {
@@ -42,7 +48,7 @@ export function apply(ctx: Context, config: Config) {
           } else {
             messages.push(
               <message>
-                <image url={image.urls.original}></image>
+                <image url={ _config.imageConfusion ? image.imgBase64 : image.urls.original }></image>
                 <text content={`\ntitle：${image.title}\n`}></text>
                 <text content={`id：${image.pid}\n`}></text>
                 <text content={`tags：${image.tags.map((item) => {
@@ -95,8 +101,20 @@ async function getPixivImage(ctx: Context, tag: string) {
     params['excludeAI'] = true;
   }
 
+  if (_config.imageConfusion) {
+    params['imageConfusion'] = true;
+  }
+
+  let imgData = null;
+  let afterMove : ArrayBuffer = null;
+  let imgBase64: String;
   const res = await ctx.http.get(HttpUtil.setParams(pixivUrl.url, params), getAxiosConfig() as any);
-  return res.data[0];
+  if (params['imageConfusion']) {
+    imgData = await ctx.http.get(res.data[0].urls.original, getAxiosConfig() as any);
+    afterMove = imageConfusion(imgData, 10, 10);
+    imgBase64 = arrayBufferToBase64(afterMove);
+  }
+  return params['imageConfusion'] ? { ...res.data[0], imgBase64 } : res.data[0];
 }
 
 const getAxiosConfig = (): AxiosRequestConfig | undefined => {

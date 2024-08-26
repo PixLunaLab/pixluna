@@ -6,6 +6,7 @@ export interface Config {
   proxyHost: string;
   r18P: number;
   excludeAI: boolean;
+  imageConfusion: boolean;
 }
 
 // @ts-ignore
@@ -14,6 +15,7 @@ export const Config: Schema<Config> = Schema.intersect([
     isR18: Schema.boolean().default(false).description('是否开启R18'),
     isProxy: Schema.boolean().default(false).description('是否使用代理'),
     excludeAI: Schema.boolean().default(false).description('是否排除 AI 作品'),
+    imageConfusion: Schema.boolean().default(false).description('是否绕过图片检测'),
   }),
   Schema.union([
     Schema.object({
@@ -33,7 +35,10 @@ export const Config: Schema<Config> = Schema.intersect([
       r18P: Schema.percent().default(0.1).description('R18概率')
         .min(0).max(1).step(0.01),
     }),
-  ])
+  ]),
+  Schema.object({
+    imageConfusion: Schema.const(true),
+  })
 ]);
 
 export default Config;
