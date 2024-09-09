@@ -1,8 +1,12 @@
-import sharp from 'sharp';
+import { } from "@quanhuzeyu/koishi-plugin-qhzy-sharp"  // 导入类型声明
+const inject = ["QhzySharp"]  // 使用koishi的inject来确保服务加载后再启动本模块
+
+
 import axios from 'axios';
 import { Lolicon } from './Interface';
 import stream from 'stream';
 import { promisify } from 'util';
+import { Context } from "koishi";
 
 const streamPipeline = promisify(stream.pipeline);
 
@@ -37,13 +41,14 @@ async function streamToBuffer(stream: NodeJS.ReadableStream) {
   return Buffer.concat(chunks);
 }
 
-export async function mixImage(image: Lolicon): Promise<string> {
+export async function mixImage(image: Lolicon, ctx: Context): Promise<string> {
+  const Sharp = ctx.QhzySharp.Sharp  // 获取原生Sharp
   const imageStream = await fetchImageStream(image.urls.original);
 
   const imageBuffer = await streamToBuffer(imageStream);
-  const { width, height } = await sharp(imageBuffer).metadata();
+  const { width, height } = await Sharp(imageBuffer).metadata();
 
-  const { data, info } = await sharp(imageBuffer)
+  const { data, info } = await Sharp(imageBuffer)
     .raw()
     .toBuffer({ resolveWithObject: true });
 
@@ -59,7 +64,7 @@ export async function mixImage(image: Lolicon): Promise<string> {
     }
   }
 
-  const processedImageBuffer = await sharp(data, {
+  const processedImageBuffer = await Sharp(data, {
     raw: {
       width: info.width,
       height: info.height,

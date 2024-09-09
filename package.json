@@ -9,7 +9,6 @@
   ],
   "license": "MIT",
   "homepage": "https://github.com/Hoshino-Yumetsuki/koishi-plugin-pixiv",
-  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Hoshino-Yumetsuki/koishi-plugin-pixiv"
@@ -24,6 +23,7 @@
     "koishi": "^4.13.1"
   },
   "dependencies": {
+    "@quanhuzeyu/koishi-plugin-qhzy-sharp": "^1.0.0",
     "axios": "^1.7.5",
     "koishi": "^4.13.1",
     "sharp": "^0.33.5"
