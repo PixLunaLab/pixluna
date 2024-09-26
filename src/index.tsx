@@ -4,6 +4,7 @@ import { ParallelPool } from "./utils/data";
 import { render } from "./main/renderer";
 import { taskTime } from "./utils/data";
 import { LoliconSourceProvider } from "./main/providers/lolicon";
+import { deleteMessage } from "./utils/recall"; // Import deleteMessage function
 
 export function apply(ctx: Context, config: Config) {
   ctx
@@ -57,6 +58,15 @@ export function apply(ctx: Context, config: Config) {
             <text content={" 消息发送失败了喵，账号可能被风控\n"}></text>
           </>
         );
+      }
+
+      // Add recall feature
+      if (config.willRecall) {
+        ctx.setTimeout(async () => {
+          for (const messageId of id) {
+            await deleteMessage(ctx, session.bot, session.channelId, messageId);
+          }
+        }, config.recallTime);
       }
     });
 }

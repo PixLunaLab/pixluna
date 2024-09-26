@@ -12,6 +12,8 @@ export interface Config {
   forwardMessage: boolean;
   compress: boolean;
   srcProvider: string;
+  willRecall: boolean;
+  recallTime: number;
 }
 
 export const Config: Schema<Config> = Schema.intersect([
@@ -63,6 +65,12 @@ export const Config: Schema<Config> = Schema.intersect([
       .max(1)
       .step(0.01),
   }).description("R18 内容设置"),
+
+  // 自动撤回设置
+  Schema.object({
+    willRecall: Schema.boolean().default(false).description("是否启用自动撤回功能。"),
+    recallTime: Schema.number().default(60000).description("消息存活时间")
+  }).description("自动撤回功能"),
 
   // 代理设置
   Schema.object({
