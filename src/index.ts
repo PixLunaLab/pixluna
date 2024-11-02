@@ -22,7 +22,7 @@ export function apply(ctx: Context, config: Config) {
                 return h('', [
                     h('at', { id: session.userId }),
                     h('text', {
-                        content: ' 图片数量必须是大于0的整数喵~'
+                        content: ' 图片数量必须是大于0的整数哦~'
                     })
                 ])
             }
