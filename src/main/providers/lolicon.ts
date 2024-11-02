@@ -56,7 +56,8 @@ export class LoliconSourceProvider extends SourceProvider {
             r18: props.r18 ? 1 : 0,
             num: 1,
             size: props.size,
-            keyword: props.tag,
+            keyword: props.tag || undefined,
+            tag: props.tag ? [props.tag] : undefined,
             excludeAI: props.excludeAI,
             proxy: props.proxy
         }
