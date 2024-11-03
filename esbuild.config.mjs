@@ -3,7 +3,7 @@ import esbuild from 'esbuild'
 const options = {
     entryPoints: ['./src/index.ts'],
     bundle: true,
-    outdir: 'dist',
+    outdir: 'lib',
     minify: true,
     platform: 'node',
     packages: 'external',
