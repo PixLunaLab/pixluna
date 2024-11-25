@@ -6,7 +6,6 @@ import { getProvider, Providers } from './main/providers'
 import { logger } from './index'
 import { PixivFollowingSourceProvider } from './main/providers/pixiv-following'
 
-// 主要的色图命令处理函数
 export async function mainPixlunaCommand(
     ctx: Context,
     config: Config,
@@ -31,7 +30,6 @@ export async function mainPixlunaCommand(
             : sourceProviders
     }
 
-    // 验证图源
     if (options.source) {
         try {
             getProvider(ctx, {
@@ -86,7 +84,6 @@ export async function mainPixlunaCommand(
     }
 }
 
-// 显示图片来源命令处理函数
 export async function handleSourceCommand(session: any) {
     const availableSources = Object.keys(Providers)
     const message = h('message', [
@@ -98,7 +95,6 @@ export async function handleSourceCommand(session: any) {
     await session.send(message)
 }
 
-// 获取Pixiv图片命令处理函数
 export async function getPixivImageByIDCommand(
     ctx: Context,
     config: Config,
@@ -123,7 +119,6 @@ export async function getPixivImageByIDCommand(
     return await render(ctx, config, undefined, 'pixiv-following')
 }
 
-// 工具函数：创建带@的消息
 function createAtMessage(userId: string, content: string) {
     return h('', [
         h('at', { id: userId }),

@@ -33,7 +33,6 @@
         "@koishijs/plugin-proxy-agent": "^0.3.3",
         "@typescript-eslint/eslint-plugin": "^7.18.0",
         "@typescript-eslint/parser": "^8.6.0",
-        "atsc": "^1.2.2",
         "esbuild": "^0.23.1",
         "esbuild-register": "^3.6.0",
         "eslint": "^8.57.1",
