@@ -99,7 +99,7 @@ export async function getPixivImageByIDCommand(
     ctx: Context,
     config: Config,
     session: any,
-    options: any
+    options: { pid: string; page: number }
 ) {
     if (!options.pid) {
         return createAtMessage(session.userId, '请提供作品 ID (PID)')
@@ -116,7 +116,17 @@ export async function getPixivImageByIDCommand(
         return createAtMessage(session.userId, errorMessage || '获取图片失败')
     }
 
-    return await render(ctx, config, undefined, 'pixiv-following')
+    const metadata = result.data.raw
+    const message = h('message', [
+        h('image', { url: result.data.url }),
+        h('text', {
+            content: `\nTitle: ${metadata.title}\nAuthor: ${metadata.author}\nTags: ${metadata.tags.join(
+                ', '
+            )}`
+        })
+    ])
+
+    return message
 }
 
 function createAtMessage(userId: string, content: string) {
