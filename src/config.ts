@@ -55,9 +55,9 @@ export const Config: Schema<Config> = Schema.intersect([
                 '是否压缩图片（能大幅度提升发送的速度，但是对图片质量有影响）'
             ),
 
-        compressQuality: Schema.number()
+        compressQuality: Schema.percent()
             .default(65)
-            .description('图片压缩质量 (1-100)')
+            .description('图片压缩质量')
             .min(1)
             .max(100)
             .step(1)
