@@ -23,16 +23,20 @@ export function apply(ctx: Context, config: Config) {
             return await mainPixlunaCommand(ctx, config, session, options, tag)
         })
 
-    ctx.command('pixluna.source', '显示可用的图片来源')
-        .action(async ({ session }) => {
+    ctx.command('pixluna.source', '显示可用的图片来源').action(
+        async ({ session }) => {
             await handleSourceCommand(session)
-        })
+        }
+    )
 
     ctx.command('pixluna.get', '直接通过图源获取图片')
         .subcommand('.pixiv <pid:string>', '通过 PID 获取 Pixiv 图片')
         .option('pages', '-p <pages:number>', { fallback: 0 })
         .action(async ({ session, options }, pid) => {
-            return await getPixivImageByIDCommand(ctx, config, session, { pid, page: options.pages })
+            return await getPixivImageByIDCommand(ctx, config, session, {
+                pid,
+                page: options.pages
+            })
         })
 }
 

@@ -3,7 +3,7 @@ import Config from '../config'
 import { getRemoteImage } from './request'
 import { GeneralImageData } from '../utils/type'
 
-function renderImageMessage(
+export function renderImageMessage(
     image: GeneralImageData & { data: Buffer; mimeType: string }
 ): h {
     return h('', [

@@ -1,10 +1,13 @@
 import { Context, h } from 'koishi'
 import type Config from './config'
 import { ParallelPool, taskTime } from './utils/data'
-import { render } from './main/renderer'
+import { render, renderImageMessage } from './main/renderer'
 import { getProvider, Providers } from './main/providers'
 import { logger } from './index'
 import { PixivFollowingSourceProvider } from './main/providers/pixiv-following'
+import { fetchImageBuffer } from './utils/imageFetcher'
+
+import { GeneralImageData } from './utils/type'
 
 export async function mainPixlunaCommand(
     ctx: Context,
@@ -116,17 +119,35 @@ export async function getPixivImageByIDCommand(
         return createAtMessage(session.userId, errorMessage || '获取图片失败')
     }
 
-    const metadata = result.data.raw
-    const message = h('message', [
-        h('image', { url: result.data.url }),
-        h('text', {
-            content: `\nTitle: ${metadata.title}\nAuthor: ${metadata.author}\nTags: ${metadata.tags.join(
-                ', '
-            )}`
-        })
-    ])
+    try {
+        const [arrayBuffer, mimeType] = await fetchImageBuffer(
+            ctx,
+            config,
+            result.data.url,
+            provider
+        )
+        const buffer = Buffer.from(arrayBuffer)
 
-    return message
+        const imageData: GeneralImageData & { data: Buffer; mimeType: string } =
+            {
+                data: buffer,
+                mimeType,
+                id: result.data.raw.id,
+                title: result.data.raw.title,
+                tags: result.data.raw.tags,
+                author: result.data.raw.author,
+                r18: result.data.raw.r18,
+                extension: result.data.raw.extension,
+                aiType: result.data.raw.aiType,
+                uploadDate: result.data.raw.uploadDate,
+                urls: result.data.raw.urls
+            }
+
+        return renderImageMessage(imageData)
+    } catch (e) {
+        ctx.logger.error(e)
+        return createAtMessage(session.userId, `图片获取失败：${e}`)
+    }
 }
 
 function createAtMessage(userId: string, content: string) {
