@@ -1,10 +1,11 @@
 import sharp from 'sharp'
 import { Context } from 'koishi'
+import type Config from '../config'
 
-export async function qualityImage(_ctx: Context, imageBuffer: ArrayBuffer) {
+export async function qualityImage(_ctx: Context, imageBuffer: ArrayBuffer, config: Config) {
     let image = sharp(imageBuffer)
 
-    const qualifiedImage = await image.png({ quality: 65 }).toBuffer()
+    const qualifiedImage = await image.png({ quality: config.compressQuality }).toBuffer()
 
     image.destroy()
     image = undefined
@@ -15,10 +16,10 @@ export async function qualityImage(_ctx: Context, imageBuffer: ArrayBuffer) {
 export async function mixImage(
     ctx: Context,
     imageBuffer: ArrayBuffer,
-    compress: boolean = false
+    config: Config
 ) {
-    if (compress) {
-        imageBuffer = await qualityImage(ctx, imageBuffer)
+    if (config.compress) {
+        imageBuffer = await qualityImage(ctx, imageBuffer, config)
     }
 
     let image = sharp(imageBuffer)

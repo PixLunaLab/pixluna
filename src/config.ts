@@ -11,6 +11,7 @@ export interface Config {
     maxConcurrency: number
     forwardMessage: boolean
     compress: boolean
+    compressQuality: number
     defaultSourceProvider: string[]
     isLog: boolean
     pixiv: {
@@ -52,7 +53,14 @@ export const Config: Schema<Config> = Schema.intersect([
             .default(false)
             .description(
                 '是否压缩图片（能大幅度提升发送的速度，但是对图片质量有影响）'
-            )
+            ),
+
+        compressQuality: Schema.number()
+            .default(65)
+            .description('图片压缩质量 (1-100)')
+            .min(1)
+            .max(100)
+            .step(1)
     }).description('通用设置'),
 
     // R18 内容设置
