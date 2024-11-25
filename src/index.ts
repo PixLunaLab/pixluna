@@ -4,6 +4,7 @@ import { ParallelPool, taskTime } from './utils/data'
 import { render } from './main/renderer'
 import { getProvider, Providers } from './main/providers'
 import { createLogger, setLoggerLevel } from './utils/logger'
+import { PixivFollowingSourceProvider } from './main/providers/pixiv-following'
 
 export let logger: Logger
 
@@ -118,6 +119,48 @@ export function apply(ctx: Context, config: Config) {
                 )
             ])
             await session.send(message)
+        })
+
+        .subcommand('.get.pixiv', '通过 PID 获取 Pixiv 图片')
+        .option('pid', '-p <pid:string>')
+        .option('page', '-n <page:number>', { fallback: 0 })
+        .action(async ({ session, options }) => {
+            if (!options.pid) {
+                return h('', [
+                    h('at', { id: session.userId }),
+                    h('text', { content: ' 请提供作品 ID (PID)' })
+                ])
+            }
+
+            const provider = new PixivFollowingSourceProvider(ctx, config)
+
+            const result = await provider.getImageByPid(
+                ctx,
+                options.pid,
+                options.page
+            )
+
+            if (result.status === 'error') {
+                const errorMessage =
+                    result.data instanceof Error
+                        ? result.data.message
+                        : String(result.data)
+
+                return h('', [
+                    h('at', { id: session.userId }),
+                    h('text', {
+                        content: ` ${errorMessage || '获取图片失败'}`
+                    })
+                ])
+            }
+
+            const message = await render(
+                ctx,
+                config,
+                undefined,
+                'pixiv-following'
+            )
+            return message
         })
 }
 
