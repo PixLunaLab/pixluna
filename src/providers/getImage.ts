@@ -1,4 +1,4 @@
-import { Context, h } from 'koishi'
+import { Context } from 'koishi'
 import type Config from '../config'
 import { PixivGetByID } from './pixiv/pixivGetByID'
 import { createAtMessage, renderImageMessage } from '../utils/renderer'
