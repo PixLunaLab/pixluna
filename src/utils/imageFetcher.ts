@@ -5,7 +5,6 @@ import type {} from '@koishijs/plugin-proxy-agent'
 import { logger } from '../index'
 import { SourceProvider } from './type'
 
-// 添加一个新的函数来检测MIME类型
 function detectMimeType(buffer: ArrayBuffer): string {
     const arr = new Uint8Array(buffer).subarray(0, 4)
     let header = ''
@@ -27,7 +26,6 @@ function detectMimeType(buffer: ArrayBuffer): string {
     }
 }
 
-// 添加 UA 常量
 export const USER_AGENT =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'
 
@@ -42,7 +40,6 @@ export async function fetchImageBuffer(
             'User-Agent': USER_AGENT
         }
 
-        // 如果提供者有 referer，添加到请求头
         if (provider?.getMeta?.()?.referer) {
             headers['Referer'] = provider.getMeta().referer
         }
