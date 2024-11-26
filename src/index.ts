@@ -10,6 +10,7 @@ export function apply(ctx: Context, config: Config) {
     logger = createLogger(ctx)
     setupLogger(config)
 
+    // Main
     ctx.command('pixluna [tag:text]', '来张色图')
         .alias('色图')
         .option('n', '-n <value:number>', {
@@ -26,8 +27,9 @@ export function apply(ctx: Context, config: Config) {
         }
     )
 
-    ctx.command('pixluna.get', '直接通过图源获取图片')
-        .subcommand('.pixiv <pid:string>', '通过 PID 获取 Pixiv 图片')
+
+    // Get
+    ctx.command('pixluna.get.pixiv <pid:string>', '直接通过图源获取图片')
         .option('pages', '-p <pages:number>', { fallback: 0 })
         .action(async ({ session, options }, pid) => {
             return await getPixivImageByID(ctx, config, session.userId, {
