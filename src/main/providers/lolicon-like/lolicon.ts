@@ -1,16 +1,16 @@
 import { Context } from 'koishi'
-import type { Config } from '../../config'
+import type { Config } from '../../../config'
 import type {
     CommonSourceRequest,
     GeneralImageData,
     ImageMetaData,
     ImageSourceMeta,
     SourceResponse
-} from '../../utils/type'
-import { SourceProvider } from '../../utils/type'
-import { logger } from '../../index'
+} from '../../../utils/type'
+import { SourceProvider } from '../../../utils/type'
+import { logger } from '../../../index'
 
-export interface LolisukiSourceRequest {
+export interface LoliconSourceRequest {
     r18?: number
     num?: number
     uid?: number[]
@@ -21,7 +21,7 @@ export interface LolisukiSourceRequest {
     excludeAI?: boolean
 }
 
-interface LolisukiResponse {
+interface LoliconResponse {
     error: string
     data: {
         pid: number
@@ -41,18 +41,24 @@ interface LolisukiResponse {
     }[]
 }
 
-export class LolisukiSourceProvider extends SourceProvider {
-    static RANDOM_IMAGE_URL = 'https://lolisuki.cn/api/setu/v1'
+export class LoliconSourceProvider extends SourceProvider {
+    static description = 'Lolicon API 图库，支持 R18 内容'
+    protected declare ctx: Context
+    protected declare config: Config
+
+    static RANDOM_IMAGE_URL = 'https://api.lolicon.app/setu/v2'
 
     constructor(ctx: Context, config: Config) {
         super(ctx, config)
+        this.ctx = ctx
+        this.config = config
     }
 
     async getMetaData(
         { context }: { context: Context },
         props: CommonSourceRequest
     ): Promise<SourceResponse<ImageMetaData>> {
-        const requestParams: LolisukiSourceRequest = {
+        const requestParams: LoliconSourceRequest = {
             r18: props.r18 ? 1 : 0,
             num: 1,
             size: props.size,
@@ -62,8 +68,8 @@ export class LolisukiSourceProvider extends SourceProvider {
             proxy: props.proxy
         }
 
-        const res = await context.http.post<LolisukiResponse>(
-            LolisukiSourceProvider.RANDOM_IMAGE_URL,
+        const res = await context.http.post<LoliconResponse>(
+            LoliconSourceProvider.RANDOM_IMAGE_URL,
             requestParams,
             {
                 proxyAgent: this.config.isProxy

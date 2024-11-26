@@ -4,7 +4,7 @@ import { ParallelPool, taskTime } from './utils/data'
 import { render, renderImageMessage } from './main/renderer'
 import { getProvider, Providers } from './main/providers'
 import { logger } from './index'
-import { PixivFollowingSourceProvider } from './main/providers/pixiv-following'
+import { PixivFollowingSourceProvider } from './main/providers/pixiv/pixiv-following'
 import { fetchImageBuffer } from './utils/imageFetcher'
 
 import { GeneralImageData } from './utils/type'
@@ -88,11 +88,11 @@ export async function mainPixlunaCommand(
 }
 
 export async function handleSourceCommand(session: any) {
-    const availableSources = Object.keys(Providers)
+    const availableSources = Object.entries(Providers)
     const message = h('message', [
         h('text', { content: '可用的图片来源：\n' }),
-        ...availableSources.map((source) =>
-            h('text', { content: `- ${source}\n` })
+        ...availableSources.map(([source, Provider]) =>
+            h('text', { content: `- ${source}: ${Provider.description}\n` })
         )
     ])
     await session.send(message)

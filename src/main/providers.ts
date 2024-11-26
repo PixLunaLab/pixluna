@@ -1,25 +1,21 @@
 import { Context } from 'koishi'
 import { SourceProvider } from '../utils/type'
-import { LoliconSourceProvider } from './providers/lolicon'
-import { LolisukiSourceProvider } from './providers/lolisuki'
-import { PixivDiscoverySourceProvider } from './providers/pixiv-discovery'
-import { PixivFollowingSourceProvider } from './providers/pixiv-following'
+import { LoliconSourceProvider } from './providers/lolicon-like/lolicon'
+import { LolisukiSourceProvider } from './providers/lolicon-like/lolisuki'
+import { PixivDiscoverySourceProvider } from './providers/pixiv/pixiv-discovery'
+import { PixivFollowingSourceProvider } from './providers/pixiv/pixiv-following'
 import type { Config } from '../config'
 import { shuffleArray } from '../utils/shuffle'
 
-export type ProviderTypes =
-    | 'lolicon'
-    | 'lolisuki'
-    | 'pixiv-discovery'
-    | 'pixiv-following'
+export type ProviderTypes = 'lolicon' | 'lolisuki' | 'pdiscovery' | 'pfollowing'
 
 export const Providers: {
-    [K in ProviderTypes]: new (ctx: Context, config: Config) => SourceProvider
+    [K in ProviderTypes]: typeof SourceProvider & { description: string }
 } = {
     lolicon: LoliconSourceProvider,
     lolisuki: LolisukiSourceProvider,
-    'pixiv-discovery': PixivDiscoverySourceProvider,
-    'pixiv-following': PixivFollowingSourceProvider
+    pdiscovery: PixivDiscoverySourceProvider,
+    pfollowing: PixivFollowingSourceProvider
 }
 
 export function getProvider(

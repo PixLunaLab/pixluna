@@ -91,8 +91,8 @@ export const Config: Schema<Config> = Schema.intersect([
             Schema.union([
                 Schema.const('lolicon').description('Lolicon API'),
                 Schema.const('lolisuki').description('Lolisuki API'),
-                Schema.const('pixiv-discovery').description('Pixiv Discovery'),
-                Schema.const('pixiv-following').description('Pixiv Following')
+                Schema.const('pdiscovery').description('Pixiv Discovery'),
+                Schema.const('pfollowing').description('Pixiv Following')
             ])
         )
             .description('选择默认图片来源（可多选）')

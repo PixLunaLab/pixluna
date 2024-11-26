@@ -1,15 +1,15 @@
 import { Context } from 'koishi'
-import type { Config } from '../../config'
+import type { Config } from '../../../config'
 import type {
     GeneralImageData,
     ImageMetaData,
     ImageSourceMeta,
     SourceResponse
-} from '../../utils/type'
-import { SourceProvider } from '../../utils/type'
-import { shuffleArray } from '../../utils/shuffle'
-import { logger } from '../../index'
-import { USER_AGENT } from '../../utils/imageFetcher'
+} from '../../../utils/type'
+import { SourceProvider } from '../../../utils/type'
+import { shuffleArray } from '../../../utils/shuffle'
+import { logger } from '../../../index'
+import { USER_AGENT } from '../../../utils/imageFetcher'
 
 interface PixivFollowingResponse {
     error: boolean
@@ -71,6 +71,7 @@ export interface PixivFollowingSourceRequest {
 }
 
 export class PixivFollowingSourceProvider extends SourceProvider {
+    static description = 'Pixiv 已关注画师作品，需要 Pixiv 账号'
     static FOLLOWING_URL =
         'https://www.pixiv.net/ajax/user/{USER_ID}/following?offset={OFFSET_COUNT}&limit={LIMIT_COUNT}&rest=show'
 

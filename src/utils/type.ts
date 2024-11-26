@@ -64,17 +64,22 @@ export interface ImageSourceMeta {
 }
 
 export abstract class SourceProvider {
-    protected constructor(
-        protected ctx: Context,
-        protected config: Config
-    ) {}
+    static description: string
+
+    protected config: Config
+    protected ctx: Context
+
+    constructor(ctx: Context, config: Config) {
+        this.ctx = ctx
+        this.config = config
+    }
 
     abstract getMetaData(
-        context: { context: Context },
-        props: CommonSourceRequest
+        props: { context: Context },
+        request: CommonSourceRequest
     ): Promise<SourceResponse<ImageMetaData>>
 
     abstract setConfig(config: Config): void
 
-    getMeta?(): ImageSourceMeta
+    abstract getMeta(): ImageSourceMeta
 }

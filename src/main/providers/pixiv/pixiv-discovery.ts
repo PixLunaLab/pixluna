@@ -1,16 +1,16 @@
 import { Context } from 'koishi'
-import type { Config } from '../../config'
+import type { Config } from '../../../config'
 import type {
     CommonSourceRequest,
     GeneralImageData,
     ImageMetaData,
     ImageSourceMeta,
     SourceResponse
-} from '../../utils/type'
-import { SourceProvider } from '../../utils/type'
-import { shuffleArray } from '../../utils/shuffle'
-import { logger } from '../../index'
-import { USER_AGENT } from '../../utils/imageFetcher'
+} from '../../../utils/type'
+import { SourceProvider } from '../../../utils/type'
+import { shuffleArray } from '../../../utils/shuffle'
+import { logger } from '../../../index'
+import { USER_AGENT } from '../../../utils/imageFetcher'
 
 interface PixivResponse {
     error: boolean
@@ -41,6 +41,7 @@ export class PixivDiscoverySourceProvider extends SourceProvider {
     static DISCOVERY_URL = 'https://www.pixiv.net/ajax/illust/discovery'
     static ILLUST_PAGES_URL =
         'https://www.pixiv.net/ajax/illust/{ARTWORK_ID}/pages'
+    static description = 'Pixiv 推荐图片，需要 Pixiv 账号'
 
     constructor(ctx: Context, config: Config) {
         super(ctx, config)
