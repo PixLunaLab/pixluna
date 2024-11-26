@@ -4,10 +4,7 @@ import { ParallelPool, taskTime } from './utils/data'
 import { render, renderImageMessage } from './main/renderer'
 import { getProvider, Providers } from './main/providers'
 import { logger } from './index'
-import { PixivFollowingSourceProvider } from './main/providers/pixiv/pixivFollowing'
-import { fetchImageBuffer } from './utils/imageFetcher'
-
-import { GeneralImageData } from './utils/type'
+import { PixivGetByID } from './main/providers/pixiv/pixivGetByID'
 
 export async function mainPixlunaCommand(
     ctx: Context,
@@ -108,45 +105,15 @@ export async function getPixivImageByIDCommand(
         return createAtMessage(session.userId, '请提供作品 ID (PID)')
     }
 
-    const provider = new PixivFollowingSourceProvider(ctx, config)
-    const result = await provider.getImageByPid(ctx, options.pid, options.page)
-
-    if (result.status === 'error') {
-        const errorMessage =
-            result.data instanceof Error
-                ? result.data.message
-                : String(result.data)
-        return createAtMessage(session.userId, errorMessage || '获取图片失败')
-    }
+    const provider = new PixivGetByID(ctx, config)
 
     try {
-        const [arrayBuffer, mimeType] = await fetchImageBuffer(
-            ctx,
-            config,
-            result.data.url,
-            provider
-        )
-        const buffer = Buffer.from(arrayBuffer)
-
-        const imageData: GeneralImageData & { data: Buffer; mimeType: string } =
-            {
-                data: buffer,
-                mimeType,
-                id: result.data.raw.id,
-                title: result.data.raw.title,
-                tags: result.data.raw.tags,
-                author: result.data.raw.author,
-                r18: result.data.raw.r18,
-                extension: result.data.raw.extension,
-                aiType: result.data.raw.aiType,
-                uploadDate: result.data.raw.uploadDate,
-                urls: result.data.raw.urls
-            }
-
+        const imageData = await provider.getImageWithBuffer(options.pid, options.page)
         return renderImageMessage(imageData)
     } catch (e) {
         ctx.logger.error(e)
-        return createAtMessage(session.userId, `图片获取失败：${e}`)
+        const errorMessage = e instanceof Error ? e.message : String(e)
+        return createAtMessage(session.userId, errorMessage || '获取图片失败')
     }
 }
 
