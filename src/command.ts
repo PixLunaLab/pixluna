@@ -1,10 +1,9 @@
 import { Context, h } from 'koishi'
 import type Config from './config'
-import { ParallelPool, taskTime } from './utils/data'
-import { render, renderImageMessage } from './main/renderer'
+import { ParallelPool, taskTime } from './utils/taskManager'
+import { createAtMessage, render } from './utils/renderer'
 import { getProvider, Providers } from './main/providers'
 import { logger } from './index'
-import { PixivGetByID } from './main/providers/pixiv/pixivGetByID'
 
 export async function mainPixlunaCommand(
     ctx: Context,
@@ -93,33 +92,4 @@ export async function handleSourceCommand(session: any) {
         )
     ])
     await session.send(message)
-}
-
-export async function getPixivImageByIDCommand(
-    ctx: Context,
-    config: Config,
-    session: any,
-    options: { pid: string; page: number }
-) {
-    if (!options.pid) {
-        return createAtMessage(session.userId, '请提供作品 ID (PID)')
-    }
-
-    const provider = new PixivGetByID(ctx, config)
-
-    try {
-        const imageData = await provider.getImageWithBuffer(options.pid, options.page)
-        return renderImageMessage(imageData)
-    } catch (e) {
-        ctx.logger.error(e)
-        const errorMessage = e instanceof Error ? e.message : String(e)
-        return createAtMessage(session.userId, errorMessage || '获取图片失败')
-    }
-}
-
-function createAtMessage(userId: string, content: string) {
-    return h('', [
-        h('at', { id: userId }),
-        h('text', { content: ` ${content}` })
-    ])
 }

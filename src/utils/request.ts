@@ -1,10 +1,10 @@
 import { Context } from 'koishi'
 import Config from '../config'
-import { GeneralImageData } from '../utils/type'
-import { taskTime } from '../utils/data'
-import { mixImage, qualityImage } from '../utils/imageProcessing'
-import { fetchImageBuffer } from '../utils/imageFetcher'
-import { getProvider } from './providers'
+import { GeneralImageData } from './type'
+import { taskTime } from './taskManager'
+import { mixImage, qualityImage } from './imageProcessing'
+import { fetchImageBuffer } from './imageFetcher'
+import { getProvider } from '../main/providers'
 
 export async function getRemoteImage(
     ctx: Context,

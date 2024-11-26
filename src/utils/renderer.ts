@@ -1,7 +1,7 @@
 import { Context, h } from 'koishi'
 import Config from '../config'
 import { getRemoteImage } from './request'
-import { GeneralImageData } from '../utils/type'
+import { GeneralImageData } from './type'
 
 export function renderImageMessage(
     image: GeneralImageData & { data: Buffer; mimeType: string }
@@ -35,4 +35,11 @@ export async function render(
 
         return h('message', [h('text', { content: `图片获取失败了喵~，${e}` })])
     }
+}
+
+export function createAtMessage(userId: string, content: string) {
+    return h('', [
+        h('at', { id: userId }),
+        h('text', { content: ` ${content}` })
+    ])
 }

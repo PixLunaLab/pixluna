@@ -8,7 +8,7 @@ import type {
 } from '../../../utils/type'
 import { SourceProvider } from '../../../utils/type'
 import { logger } from '../../../index'
-import { USER_AGENT, fetchImageBuffer } from '../../../utils/imageFetcher'
+import { fetchImageBuffer, USER_AGENT } from '../../../utils/imageFetcher'
 
 interface PixivIllustResponse {
     error: boolean
@@ -126,10 +126,7 @@ export class PixivGetByID extends SourceProvider {
         context: Context,
         illustId: string
     ): Promise<PixivIllustResponse> {
-        const url = PixivGetByID.ILLUST_URL.replace(
-            '{ARTWORK_ID}',
-            illustId
-        )
+        const url = PixivGetByID.ILLUST_URL.replace('{ARTWORK_ID}', illustId)
         return await context.http.get<PixivIllustResponse>(url, {
             headers: this.getHeaders(),
             proxyAgent: this.getProxyAgent()
@@ -202,4 +199,4 @@ export class PixivGetByID extends SourceProvider {
             urls: result.data.raw.urls
         }
     }
-} 
+}

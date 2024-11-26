@@ -1,11 +1,8 @@
 import { Context, Logger } from 'koishi'
 import type Config from './config'
 import { createLogger, setLoggerLevel } from './utils/logger'
-import {
-    getPixivImageByIDCommand,
-    handleSourceCommand,
-    mainPixlunaCommand
-} from './command'
+import { handleSourceCommand, mainPixlunaCommand } from './command'
+import { getPixivImageByID } from './main/providers/getImage'
 
 export let logger: Logger
 
@@ -33,7 +30,7 @@ export function apply(ctx: Context, config: Config) {
         .subcommand('.pixiv <pid:string>', '通过 PID 获取 Pixiv 图片')
         .option('pages', '-p <pages:number>', { fallback: 0 })
         .action(async ({ session, options }, pid) => {
-            return await getPixivImageByIDCommand(ctx, config, session, {
+            return await getPixivImageByID(ctx, config, session.userId, {
                 pid,
                 page: options.pages
             })

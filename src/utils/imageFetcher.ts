@@ -1,6 +1,6 @@
 import { Context } from 'koishi'
 import { Config } from '../config'
-import { taskTime } from './data'
+import { taskTime } from './taskManager'
 import type {} from '@koishijs/plugin-proxy-agent'
 import { logger } from '../index'
 import { SourceProvider } from './type'

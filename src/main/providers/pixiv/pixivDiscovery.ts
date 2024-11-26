@@ -41,7 +41,9 @@ export class PixivDiscoverySourceProvider extends SourceProvider {
     static DISCOVERY_URL = 'https://www.pixiv.net/ajax/illust/discovery'
     static ILLUST_PAGES_URL =
         'https://www.pixiv.net/ajax/illust/{ARTWORK_ID}/pages'
-    static description = '获取 Pixiv 推荐图片，可以通过 Pixiv 账号获取个性化推荐'
+
+    static description =
+        '获取 Pixiv 推荐图片，可以通过 Pixiv 账号获取个性化推荐'
 
     constructor(ctx: Context, config: Config) {
         super(ctx, config)
