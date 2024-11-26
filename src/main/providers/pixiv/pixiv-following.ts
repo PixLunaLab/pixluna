@@ -71,7 +71,7 @@ export interface PixivFollowingSourceRequest {
 }
 
 export class PixivFollowingSourceProvider extends SourceProvider {
-    static description = 'Pixiv 已关注画师作品，需要 Pixiv 账号'
+    static description = '获取 Pixiv 已关注画师作品，需要 Pixiv 账号'
     static FOLLOWING_URL =
         'https://www.pixiv.net/ajax/user/{USER_ID}/following?offset={OFFSET_COUNT}&limit={LIMIT_COUNT}&rest=show'
 

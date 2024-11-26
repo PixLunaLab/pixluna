@@ -42,7 +42,7 @@ interface LoliconResponse {
 }
 
 export class LoliconSourceProvider extends SourceProvider {
-    static description = 'Lolicon API 图库，支持 R18 内容'
+    static description = '通过 Lolicon API 获取图片'
     protected declare ctx: Context
     protected declare config: Config
 

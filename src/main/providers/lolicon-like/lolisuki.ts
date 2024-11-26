@@ -42,7 +42,7 @@ interface LolisukiResponse {
 }
 
 export class LolisukiSourceProvider extends SourceProvider {
-    static description = 'Lolisuki API 图库，仅支持全年龄内容'
+    static description = '通过 Lolisuki API 获取图片'
     protected declare ctx: Context
     protected declare config: Config
 
