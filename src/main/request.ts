@@ -70,12 +70,12 @@ export async function getRemoteImage(
             return await mixImage(
                 ctx,
                 imageBuffer,
-                config.compress && !urls.regular
+                config
             )
         }
 
         if (config.compress && !urls.regular && sharp) {
-            return await qualityImage(ctx, imageBuffer)
+            return await qualityImage(ctx, imageBuffer, config)
         }
 
         return imageBuffer
