@@ -4,7 +4,7 @@ import { ParallelPool, taskTime } from './utils/data'
 import { render, renderImageMessage } from './main/renderer'
 import { getProvider, Providers } from './main/providers'
 import { logger } from './index'
-import { PixivFollowingSourceProvider } from './main/providers/pixiv/pixiv-following'
+import { PixivFollowingSourceProvider } from './main/providers/pixiv/pixivFollowing'
 import { fetchImageBuffer } from './utils/imageFetcher'
 
 import { GeneralImageData } from './utils/type'
