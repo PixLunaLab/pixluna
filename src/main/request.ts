@@ -67,11 +67,7 @@ export async function getRemoteImage(
 
     const data = await taskTime(ctx, 'mixImage', async () => {
         if (config.imageConfusion && sharp) {
-            return await mixImage(
-                ctx,
-                imageBuffer,
-                config
-            )
+            return await mixImage(ctx, imageBuffer, config)
         }
 
         if (config.compress && !urls.regular && sharp) {
