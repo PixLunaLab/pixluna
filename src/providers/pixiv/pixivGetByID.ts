@@ -8,7 +8,7 @@ import type {
 } from '../../utils/type'
 import { SourceProvider } from '../../utils/type'
 import { logger } from '../../index'
-import { fetchImageBuffer, USER_AGENT } from '../../utils/imageFetcher'
+import { fetchImageBuffer, USER_AGENT } from '../../utils/request'
 
 interface PixivIllustResponse {
     error: boolean

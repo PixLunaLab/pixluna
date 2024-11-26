@@ -9,7 +9,7 @@ import type {
 import { SourceProvider } from '../../utils/type'
 import { shuffleArray } from '../../utils/shuffle'
 import { logger } from '../../index'
-import { USER_AGENT } from '../../utils/imageFetcher'
+import { USER_AGENT } from '../../utils/request'
 
 interface PixivFollowingResponse {
     error: boolean
