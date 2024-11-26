@@ -13,7 +13,7 @@ export function apply(ctx: Context, config: Config) {
     // Main
     ctx.command('pixluna [tag:text]', '来张色图')
         .alias('色图')
-        .option('n', '-n <value:number>', {
+        .option('number', '-n <value:number>', {
             fallback: 1
         })
         .option('source', '-s <source:string>', { fallback: '' })
@@ -26,7 +26,6 @@ export function apply(ctx: Context, config: Config) {
             await handleSourceCommand(session)
         }
     )
-
 
     // Get
     ctx.command('pixluna.get', '直接通过图源获取图片')
