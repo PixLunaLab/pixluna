@@ -1,9 +1,9 @@
 import { Context } from 'koishi'
 import { SourceProvider } from '../utils/type'
-import { LoliconSourceProvider } from './providers/lolicon-like/lolicon'
-import { LolisukiSourceProvider } from './providers/lolicon-like/lolisuki'
-import { PixivDiscoverySourceProvider } from './providers/pixiv/pixivDiscovery'
-import { PixivFollowingSourceProvider } from './providers/pixiv/pixivFollowing'
+import { LoliconSourceProvider } from './lolicon-like/lolicon'
+import { LolisukiSourceProvider } from './lolicon-like/lolisuki'
+import { PixivDiscoverySourceProvider } from './pixiv/pixivDiscovery'
+import { PixivFollowingSourceProvider } from './pixiv/pixivFollowing'
 import type { Config } from '../config'
 import { shuffleArray } from '../utils/shuffle'
 

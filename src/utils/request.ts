@@ -4,7 +4,7 @@ import { GeneralImageData } from './type'
 import { taskTime } from './taskManager'
 import { mixImage, qualityImage } from './imageProcessing'
 import { fetchImageBuffer } from './imageFetcher'
-import { getProvider } from '../main/providers'
+import { getProvider } from '../providers/main'
 
 export async function getRemoteImage(
     ctx: Context,

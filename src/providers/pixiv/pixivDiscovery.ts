@@ -1,16 +1,16 @@
 import { Context } from 'koishi'
-import type { Config } from '../../../config'
+import type { Config } from '../../config'
 import type {
     CommonSourceRequest,
     GeneralImageData,
     ImageMetaData,
     ImageSourceMeta,
     SourceResponse
-} from '../../../utils/type'
-import { SourceProvider } from '../../../utils/type'
-import { shuffleArray } from '../../../utils/shuffle'
-import { logger } from '../../../index'
-import { USER_AGENT } from '../../../utils/imageFetcher'
+} from '../../utils/type'
+import { SourceProvider } from '../../utils/type'
+import { shuffleArray } from '../../utils/shuffle'
+import { logger } from '../../index'
+import { USER_AGENT } from '../../utils/imageFetcher'
 
 interface PixivResponse {
     error: boolean

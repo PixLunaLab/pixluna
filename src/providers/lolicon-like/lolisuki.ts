@@ -1,14 +1,14 @@
 import { Context } from 'koishi'
-import type { Config } from '../../../config'
+import type { Config } from '../../config'
 import type {
     CommonSourceRequest,
     GeneralImageData,
     ImageMetaData,
     ImageSourceMeta,
     SourceResponse
-} from '../../../utils/type'
-import { SourceProvider } from '../../../utils/type'
-import { logger } from '../../../index'
+} from '../../utils/type'
+import { SourceProvider } from '../../utils/type'
+import { logger } from '../../index'
 
 export interface LolisukiSourceRequest {
     r18?: number

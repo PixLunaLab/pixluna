@@ -2,7 +2,7 @@ import { Context, h } from 'koishi'
 import type Config from './config'
 import { ParallelPool, taskTime } from './utils/taskManager'
 import { createAtMessage, render } from './utils/renderer'
-import { getProvider, Providers } from './main/providers'
+import { getProvider, Providers } from './providers/main'
 import { logger } from './index'
 
 export async function mainPixlunaCommand(

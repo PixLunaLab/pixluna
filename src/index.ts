@@ -2,7 +2,7 @@ import { Context, Logger } from 'koishi'
 import type Config from './config'
 import { createLogger, setLoggerLevel } from './utils/logger'
 import { handleSourceCommand, mainPixlunaCommand } from './command'
-import { getPixivImageByID } from './main/providers/getImage'
+import { getPixivImageByID } from './providers/getImage'
 
 export let logger: Logger
 

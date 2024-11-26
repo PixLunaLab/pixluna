@@ -1,14 +1,14 @@
 import { Context } from 'koishi'
-import type { Config } from '../../../config'
+import type { Config } from '../../config'
 import type {
     GeneralImageData,
     ImageMetaData,
     ImageSourceMeta,
     SourceResponse
-} from '../../../utils/type'
-import { SourceProvider } from '../../../utils/type'
-import { logger } from '../../../index'
-import { fetchImageBuffer, USER_AGENT } from '../../../utils/imageFetcher'
+} from '../../utils/type'
+import { SourceProvider } from '../../utils/type'
+import { logger } from '../../index'
+import { fetchImageBuffer, USER_AGENT } from '../../utils/imageFetcher'
 
 interface PixivIllustResponse {
     error: boolean
