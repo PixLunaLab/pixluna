@@ -3,6 +3,7 @@
     "description": "比较新的涩图插件（？",
     "version": "2.1.3-beta.12",
     "main": "lib/index.js",
+    "type": "module",
     "files": [
         "lib"
     ],
