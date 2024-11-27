@@ -3,8 +3,9 @@ import type Config from './config'
 import { createLogger, setLoggerLevel } from './utils/logger'
 import { getPixivImageByID } from './providers/getImage'
 import { ParallelPool, taskTime } from './utils/taskManager'
-import { createAtMessage, render } from './utils/renderer'
+import { render } from './utils/renderer'
 import { getProvider, Providers } from './providers/main'
+import { createAtMessage } from './utils/messageBuilder'
 
 export let logger: Logger
 
