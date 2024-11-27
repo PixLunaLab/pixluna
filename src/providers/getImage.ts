@@ -1,7 +1,7 @@
 import { Context } from 'koishi'
 import type Config from '../config'
 import { PixivGetByID } from './pixiv/pixivGetByID'
-import { createAtMessage, renderImageMessage } from '../utils/renderer'
+import { createAtMessage, renderImageMessage } from '../utils/messageBuilder'
 
 export async function getPixivImageByID(
     ctx: Context,
