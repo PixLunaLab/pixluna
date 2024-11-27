@@ -2,7 +2,7 @@ import { Context } from 'koishi'
 import { getPixivImageByID } from '../providers/getImage'
 import Config from '../config'
 
-export async function commandGet(ctx: Context, config: Config) {
+export function commandGet(ctx: Context, config: Config) {
     ctx.command('pixluna.get', '直接通过图源获取图片')
 
     ctx.command('pixluna.get.pixiv <pid:string>', '通过 pid 获取图片')

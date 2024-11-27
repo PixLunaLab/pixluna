@@ -21,7 +21,10 @@ export function apply(ctx: Context, config: Config) {
         .option('source', '-s <source:string>', { fallback: '' })
         .action(async ({ session, options }, tag) => {
             if (!Number.isInteger(options.number) || options.number <= 0) {
-                return createAtMessage(session.userId, '图片数量必须是大于0的整数哦~')
+                return createAtMessage(
+                    session.userId,
+                    '图片数量必须是大于0的整数哦~'
+                )
             }
 
             await session.send('不可以涩涩哦~')
@@ -73,7 +76,11 @@ export function apply(ctx: Context, config: Config) {
                     const combinedMessage = h('message', messages)
                     if (config.forwardMessage) {
                         return session.send(
-                            h('message', { forward: config.forwardMessage }, messages)
+                            h(
+                                'message',
+                                { forward: config.forwardMessage },
+                                messages
+                            )
                         )
                     }
                     return session.send(combinedMessage)
