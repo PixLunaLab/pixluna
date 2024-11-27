@@ -23,5 +23,3 @@ export async function render(
         return h('message', [h('text', { content: `图片获取失败了喵~，${e}` })])
     }
 }
-
-
