@@ -124,4 +124,4 @@ export abstract class BaseLoliconProvider extends SourceProvider {
             referer: 'https://www.pixiv.net/'
         }
     }
-} 
+}

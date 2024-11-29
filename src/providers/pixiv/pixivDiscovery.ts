@@ -23,18 +23,10 @@ interface PixivResponse {
             tags: string[]
             userId: string
             userName: string
-            width: number
-            height: number
-            pageCount: number
             xRestrict: number
             createDate: string
         }[]
     }
-}
-
-export interface PixivDiscoverySourceRequest {
-    mode: string
-    limit: number
 }
 
 export class PixivDiscoverySourceProvider extends SourceProvider {
@@ -42,10 +34,23 @@ export class PixivDiscoverySourceProvider extends SourceProvider {
     static ILLUST_PAGES_URL =
         'https://www.pixiv.net/ajax/illust/{ARTWORK_ID}/pages'
 
-    static description =
-        '获取 Pixiv 推荐图片，可以通过 Pixiv 账号获取个性化推荐'
+    // 提取公共请求配置
+    private getRequestConfig(additionalHeaders = {}) {
+        const headers = {
+            Referer: 'https://www.pixiv.net/',
+            'User-Agent': USER_AGENT,
+            ...(this.config.pixiv.phpSESSID && {
+                Cookie: `PHPSESSID=${this.config.pixiv.phpSESSID}`
+            }),
+            ...additionalHeaders
+        }
+        return {
+            headers,
+            proxyAgent: this.config.isProxy ? this.config.proxyHost : undefined
+        }
+    }
 
-    setConfig(config: Config) {
+    setConfig(config: Config): void {
         this.config = config
     }
 
@@ -53,31 +58,13 @@ export class PixivDiscoverySourceProvider extends SourceProvider {
         { context }: { context: Context },
         props: CommonSourceRequest
     ): Promise<SourceResponse<ImageMetaData>> {
-        logger.debug('开始获取 Pixiv Discovery 元数据')
-        const requestParams: PixivDiscoverySourceRequest = {
-            mode: props.r18 ? 'r18' : 'all',
-            limit: 8 // 修改为获取8张图片
-        }
-
-        const url = `${PixivDiscoverySourceProvider.DISCOVERY_URL}?mode=${requestParams.mode}&limit=${requestParams.limit}`
-
-        const headers = {
-            Referer: 'https://www.pixiv.net/',
-            'User-Agent': USER_AGENT
-        }
-
-        // 如果配置了 PHPSESSID，则添加到 Cookie 中
-        if (this.config.pixiv.phpSESSID) {
-            headers['Cookie'] = `PHPSESSID=${this.config.pixiv.phpSESSID}`
-        }
-
         try {
-            const discoveryRes = await context.http.get<PixivResponse>(url, {
-                headers,
-                proxyAgent: this.config.isProxy
-                    ? this.config.proxyHost
-                    : undefined
-            })
+            // 获取推荐列表
+            const url = `${PixivDiscoverySourceProvider.DISCOVERY_URL}?mode=${props.r18 ? 'r18' : 'all'}&limit=8`
+            const discoveryRes = await context.http.get<PixivResponse>(
+                url,
+                this.getRequestConfig()
+            )
 
             if (discoveryRes.error || !discoveryRes.body.illusts.length) {
                 return {
@@ -86,37 +73,31 @@ export class PixivDiscoverySourceProvider extends SourceProvider {
                 }
             }
 
-            const shuffledIllusts = shuffleArray(discoveryRes.body.illusts)
-            const selectedIllust = shuffledIllusts[0]
+            // 随机选择一张图片
+            const selectedIllust = shuffleArray(discoveryRes.body.illusts)[0]
 
+            // 获取原图链接
             const illustPagesUrl =
                 PixivDiscoverySourceProvider.ILLUST_PAGES_URL.replace(
                     '{ARTWORK_ID}',
                     selectedIllust.id
                 )
-            const illustPagesRes = await context.http.get(illustPagesUrl, {
-                headers: {
-                    Referer: 'https://www.pixiv.net/',
-                    'User-Agent': USER_AGENT
-                },
-                proxyAgent: this.config.isProxy
-                    ? this.config.proxyHost
-                    : undefined
-            })
+            const illustPagesRes = await context.http.get(
+                illustPagesUrl,
+                this.getRequestConfig()
+            )
 
             if (illustPagesRes.error || !illustPagesRes.body.length) {
-                return {
-                    status: 'error',
-                    data: new Error('无法获取原图链接')
-                }
+                return { status: 'error', data: new Error('无法获取原图链接') }
             }
 
-            const originalUrl = illustPagesRes.body[0].urls.original
-
-            // 使用 base URL 构造图片链接
             const baseUrl = this.config.baseUrl || 'i.pximg.net'
-            const constructedUrl = originalUrl.replace('i.pximg.net', baseUrl)
+            const originalUrl = illustPagesRes.body[0].urls.original.replace(
+                'i.pximg.net',
+                baseUrl
+            )
 
+            // 构造返回数据
             const generalImageData: GeneralImageData = {
                 id: parseInt(selectedIllust.id),
                 title: selectedIllust.title,
@@ -127,35 +108,22 @@ export class PixivDiscoverySourceProvider extends SourceProvider {
                 aiType: 0,
                 uploadDate: new Date(selectedIllust.createDate).getTime(),
                 urls: {
-                    original: constructedUrl,
+                    original: originalUrl,
                     regular: selectedIllust.url.replace('i.pximg.net', baseUrl)
                 }
             }
 
-            logger.debug('成功获取 Pixiv Discovery 图片元数据', {
-                metadata: generalImageData
-            })
-
             return {
                 status: 'success',
                 data: {
-                    url: constructedUrl,
-                    urls: {
-                        regular: selectedIllust.url.replace(
-                            'i.pximg.net',
-                            baseUrl
-                        ),
-                        original: constructedUrl
-                    },
+                    url: originalUrl,
+                    urls: generalImageData.urls,
                     raw: generalImageData
                 }
             }
         } catch (error) {
             logger.error('获取 Pixiv Discovery 元数据失败', { error })
-            return {
-                status: 'error',
-                data: error
-            }
+            return { status: 'error', data: error }
         }
     }
 

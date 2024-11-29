@@ -11,9 +11,12 @@ import { shuffleArray } from '../../utils/shuffle'
 import { logger } from '../../index'
 import { USER_AGENT } from '../../utils/request'
 
-interface PixivFollowingResponse {
+interface PixivBaseResponse {
     error: boolean
     message: string
+}
+
+interface PixivFollowingResponse extends PixivBaseResponse {
     body: {
         users: {
             userId: string
@@ -83,6 +86,13 @@ export class PixivFollowingSourceProvider extends SourceProvider {
 
     static ILLUST_URL = 'https://www.pixiv.net/ajax/illust/{ARTWORK_ID}'
 
+    private async fetchPixivData<T>(context: Context, url: string): Promise<T> {
+        return await context.http.get<T>(url, {
+            headers: this.getHeaders(),
+            proxyAgent: this.getProxyAgent()
+        })
+    }
+
     async getMetaData({
         context
     }: {
@@ -96,20 +106,12 @@ export class PixivFollowingSourceProvider extends SourceProvider {
         }
 
         try {
-            // 获取所有关注列表
             const allUsers = await this.getAllFollowingUsers(context)
-
             if (!allUsers.length) {
-                return {
-                    status: 'error',
-                    data: new Error('未找到关注的用户')
-                }
+                return { status: 'error', data: new Error('未找到关注的用户') }
             }
 
-            // 随机选择一个关注的用户
             const randomUser = shuffleArray(allUsers)[0]
-
-            // 获取该用户的所有作品
             const userProfileRes = await this.getUserProfile(
                 context,
                 randomUser.userId
@@ -122,7 +124,6 @@ export class PixivFollowingSourceProvider extends SourceProvider {
                 }
             }
 
-            // 从作品列表中随机选择一个非R18作品
             const illustIds = Object.keys(userProfileRes.body.illusts)
             let illustDetail: PixivIllustResponse
             let attempts = 0
@@ -167,50 +168,42 @@ export class PixivFollowingSourceProvider extends SourceProvider {
             }
 
             const illustData = illustDetail.body
-            const originalUrl = illustData.urls.original
-
-            // 构造返回数据
-            const generalImageData: GeneralImageData = {
-                id: parseInt(illustData.id),
-                title: illustData.title,
-                author: illustData.userName,
-                r18: illustData.xRestrict > 0,
-                tags: illustData.tags.tags.map((tag) => tag.tag),
-                extension: originalUrl.split('.').pop(),
-                aiType: 0,
-                uploadDate: new Date(illustData.createDate).getTime(),
-                urls: {
-                    original: this.constructImageUrl(originalUrl)
-                }
-            }
-
-            logger.debug('成功获取 Pixiv Following 图片元数据', {
-                metadata: generalImageData
-            })
-
             return {
                 status: 'success',
                 data: {
-                    url: generalImageData.urls.original,
-                    urls: generalImageData.urls,
-                    raw: generalImageData
+                    url: this.constructImageUrl(illustData.urls.original),
+                    urls: {
+                        original: this.constructImageUrl(
+                            illustData.urls.original
+                        )
+                    },
+                    raw: {
+                        id: parseInt(illustData.id),
+                        title: illustData.title,
+                        author: illustData.userName,
+                        r18: illustData.xRestrict > 0,
+                        tags: illustData.tags.tags.map((tag) => tag.tag),
+                        extension: illustData.urls.original.split('.').pop(),
+                        aiType: 0,
+                        uploadDate: new Date(illustData.createDate).getTime(),
+                        urls: {
+                            original: this.constructImageUrl(
+                                illustData.urls.original
+                            )
+                        }
+                    }
                 }
             }
         } catch (error) {
             logger.error('获取 Pixiv Discovery 元数据失败', { error })
-            return {
-                status: 'error',
-                data: error
-            }
+            return { status: 'error', data: error }
         }
     }
 
-    private async getAllFollowingUsers(
-        context: Context
-    ): Promise<PixivFollowingResponse['body']['users']> {
+    private async getAllFollowingUsers(context: Context) {
         let offset = 0
         const LIMIT = 100
-        let allUsers: PixivFollowingResponse['body']['users'] = []
+        const allUsers = []
 
         while (true) {
             const url = PixivFollowingSourceProvider.FOLLOWING_URL.replace(
@@ -220,25 +213,15 @@ export class PixivFollowingSourceProvider extends SourceProvider {
                 .replace('{OFFSET_COUNT}', offset.toString())
                 .replace('{LIMIT_COUNT}', LIMIT.toString())
 
-            const response = await context.http.get<PixivFollowingResponse>(
-                url,
-                {
-                    headers: this.getHeaders(),
-                    proxyAgent: this.getProxyAgent()
-                }
+            const response = await this.fetchPixivData<PixivFollowingResponse>(
+                context,
+                url
             )
+            if (response.error || !response.body.users.length) break
 
-            if (response.error || !response.body.users.length) {
-                break
-            }
-
-            allUsers = [...allUsers, ...response.body.users]
+            allUsers.push(...response.body.users)
             offset += LIMIT
-
-            // 如果返回的用户数小于限制数，说明已经到达末尾
-            if (response.body.users.length < LIMIT) {
-                break
-            }
+            if (response.body.users.length < LIMIT) break
         }
 
         return allUsers
@@ -252,10 +235,7 @@ export class PixivFollowingSourceProvider extends SourceProvider {
             '{USER_ID}',
             userId
         )
-        return await context.http.get<PixivUserProfileResponse>(url, {
-            headers: this.getHeaders(),
-            proxyAgent: this.getProxyAgent()
-        })
+        return await this.fetchPixivData<PixivUserProfileResponse>(context, url)
     }
 
     private async getIllustDetail(
@@ -266,10 +246,7 @@ export class PixivFollowingSourceProvider extends SourceProvider {
             '{ARTWORK_ID}',
             illustId
         )
-        return await context.http.get<PixivIllustResponse>(url, {
-            headers: this.getHeaders(),
-            proxyAgent: this.getProxyAgent()
-        })
+        return await this.fetchPixivData<PixivIllustResponse>(context, url)
     }
 
     private getHeaders() {
