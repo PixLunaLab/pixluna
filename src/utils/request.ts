@@ -55,7 +55,11 @@ export async function getRemoteImage(
         throw new Error('未选择有效的图片来源，请检查配置')
     }
 
-    const metadata = await getProvider(ctx, config, specificProvider).getMetaData(
+    const metadata = await getProvider(
+        ctx,
+        config,
+        specificProvider
+    ).getMetaData(
         { context: ctx },
         {
             r18: config.isR18 && Math.random() < config.r18P,
