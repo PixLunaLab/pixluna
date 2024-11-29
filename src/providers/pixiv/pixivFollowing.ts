@@ -83,10 +83,6 @@ export class PixivFollowingSourceProvider extends SourceProvider {
 
     static ILLUST_URL = 'https://www.pixiv.net/ajax/illust/{ARTWORK_ID}'
 
-    constructor(ctx: Context, config: Config) {
-        super(ctx, config)
-    }
-
     async getMetaData({
         context
     }: {
@@ -202,89 +198,6 @@ export class PixivFollowingSourceProvider extends SourceProvider {
             }
         } catch (error) {
             logger.error('获取 Pixiv Discovery 元数据失败', { error })
-            return {
-                status: 'error',
-                data: error
-            }
-        }
-    }
-
-    async getImageByPid(
-        context: Context,
-        pid: string,
-        page: number = 0
-    ): Promise<SourceResponse<ImageMetaData>> {
-        if (!this.config.pixiv.phpSESSID) {
-            return {
-                status: 'error',
-                data: new Error('未设置 Pixiv PHPSESSID')
-            }
-        }
-
-        try {
-            const illustDetail = await this.getIllustDetail(context, pid)
-
-            if (illustDetail.error || !illustDetail.body) {
-                return {
-                    status: 'error',
-                    data: new Error('无法获取插画详情')
-                }
-            }
-
-            const illustData = illustDetail.body
-            const originalUrl = illustData.urls.original
-
-            // 处理多图片页码
-            const urlParts = originalUrl.split('_p')
-            if (urlParts.length !== 2) {
-                return {
-                    status: 'error',
-                    data: new Error('图片URL格式错误')
-                }
-            }
-
-            // 替换页码
-            const newUrl = `${urlParts[0]}_p${page}${urlParts[1].substring(urlParts[1].indexOf('.'))}`
-
-            // 检查页码是否超出范围
-            if (page >= illustData.pageCount) {
-                return {
-                    status: 'error',
-                    data: new Error(
-                        `页码超出范围，该作品共有 ${illustData.pageCount} 页`
-                    )
-                }
-            }
-
-            // 构造返回数据
-            const generalImageData: GeneralImageData = {
-                id: parseInt(illustData.id),
-                title: illustData.title,
-                author: illustData.userName,
-                r18: illustData.xRestrict > 0,
-                tags: illustData.tags.tags.map((tag) => tag.tag),
-                extension: newUrl.split('.').pop(),
-                aiType: 0,
-                uploadDate: new Date(illustData.createDate).getTime(),
-                urls: {
-                    original: this.constructImageUrl(newUrl)
-                }
-            }
-
-            logger.debug('成功获取 Pixiv 图片元数据', {
-                metadata: generalImageData
-            })
-
-            return {
-                status: 'success',
-                data: {
-                    url: generalImageData.urls.original,
-                    urls: generalImageData.urls,
-                    raw: generalImageData
-                }
-            }
-        } catch (error) {
-            logger.error('获取 Pixiv 图片元数据失败', { error })
             return {
                 status: 'error',
                 data: error

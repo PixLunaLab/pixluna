@@ -45,8 +45,8 @@ export class PixivDiscoverySourceProvider extends SourceProvider {
     static description =
         '获取 Pixiv 推荐图片，可以通过 Pixiv 账号获取个性化推荐'
 
-    constructor(ctx: Context, config: Config) {
-        super(ctx, config)
+    setConfig(config: Config) {
+        this.config = config
     }
 
     async getMetaData(
@@ -157,10 +157,6 @@ export class PixivDiscoverySourceProvider extends SourceProvider {
                 data: error
             }
         }
-    }
-
-    setConfig(config: Config) {
-        this.config = config
     }
 
     getMeta(): ImageSourceMeta {
