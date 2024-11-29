@@ -51,61 +51,37 @@ export async function getRemoteImage(
         raw: GeneralImageData
     }
 > {
-    const provider = getProvider(ctx, config, specificProvider)
-    if (!provider) {
+    if (!getProvider(ctx, config, specificProvider)) {
         throw new Error('未选择有效的图片来源，请检查配置')
     }
 
-    let sharp
-    try {
-        sharp = (await import('sharp'))?.default
-    } catch {}
-
-    if ((config.imageConfusion || config.compress) && !sharp) {
-        ctx.logger.warn(
-            '启用了图片混淆或者图片压缩选项，但是没有检查到安装 sharp 服务，这些配置将无效。请安装 sharp 服务。'
-        )
-    }
-
-    const commonParams = {
-        r18: config.isR18 && Math.random() < config.r18P,
-        excludeAI: config.excludeAI,
-        tag: tag ? tag.split(' ').join('|') : void 0,
-        proxy: config.baseUrl ? config.baseUrl : void 0
-    }
-
-    const metadata = await provider.getMetaData(
+    const metadata = await getProvider(ctx, config, specificProvider).getMetaData(
+        { context: ctx },
         {
-            context: ctx
-        },
-        commonParams
+            r18: config.isR18 && Math.random() < config.r18P,
+            excludeAI: config.excludeAI,
+            tag: tag ? tag.split(' ').join('|') : void 0,
+            proxy: config.baseUrl ? config.baseUrl : void 0
+        }
     )
 
-    if (metadata.status === 'error') {
-        return null
-    }
-
-    const response = metadata.data
-    const { url, urls } = response
+    if (metadata.status === 'error') return null
 
     const [buffer, mimeType] = await fetchImageBuffer(
         ctx,
         config,
-        url,
-        provider
+        metadata.data.url,
+        getProvider(ctx, config, specificProvider)
     )
 
-    const imageBuffer = Buffer.from(buffer)
-
     const data = await taskTime(ctx, 'mixImage', async () => {
-        if (config.imageConfusion && sharp) {
+        const imageBuffer = Buffer.from(buffer)
+        if (config.imageConfusion) {
             return await mixImage(ctx, imageBuffer, config)
         }
-
-        if (config.compress && !urls.regular && sharp) {
+        if (config.compress && !metadata.data.urls.regular) {
             return await qualityImage(ctx, imageBuffer, config)
         }
-
         return imageBuffer
     })
 
