@@ -19,6 +19,20 @@
 - [x] 可选是否以转发的形式打包发送图片
 - [x] 压缩图片（开启后不发送原图，提升发送速度）
 
+## 支持图源
+
+- [x] pixiv
+- [x] lolicon-like
+- [ ] danbooru
+- [ ] e621
+- [ ] gelbooru
+- [ ] konachan
+- [ ] lolibooru
+- [ ] moehu
+- [ ] safebooru
+- [ ] sakanku
+- [ ] yande
+
 ## TODO（画饼 ing...）
 
 - [ ] 支持更多的平台
