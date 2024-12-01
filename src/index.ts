@@ -3,7 +3,7 @@ import type Config from './config'
 import { createLogger, setLoggerLevel } from './utils/logger'
 import { ParallelPool, taskTime } from './utils/taskManager'
 import { render } from './utils/renderer'
-import { getProvider } from './providers/main'
+import { getProvider } from './providers'
 import { createAtMessage } from './utils/messageBuilder'
 import { registerCommand } from './command'
 

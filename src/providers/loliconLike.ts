@@ -1,16 +1,16 @@
 import { Context } from 'koishi'
-import type { Config } from '../../config'
+import type { Config } from '../config'
 import type {
     CommonSourceRequest,
     GeneralImageData,
     ImageMetaData,
     ImageSourceMeta,
     SourceResponse
-} from '../../utils/type'
-import { SourceProvider } from '../../utils/type'
-import { logger } from '../../index'
+} from '../utils/type'
+import { SourceProvider } from '../utils/type'
+import { logger } from '../index'
 
-export interface BaseSourceRequest {
+export interface LoliconLikeSourceRequest {
     r18?: number
     num?: number
     uid?: number[]
@@ -21,7 +21,7 @@ export interface BaseSourceRequest {
     excludeAI?: boolean
 }
 
-export interface BaseResponse {
+export interface LoliconLikeResponse {
     error: string
     data: {
         pid: number
@@ -41,7 +41,7 @@ export interface BaseResponse {
     }[]
 }
 
-export abstract class BaseLoliconProvider extends SourceProvider {
+export abstract class LoliconLikeProvider extends SourceProvider {
     protected declare ctx: Context
     protected declare config: Config
     protected abstract RANDOM_IMAGE_URL: string
@@ -56,7 +56,7 @@ export abstract class BaseLoliconProvider extends SourceProvider {
         { context }: { context: Context },
         props: CommonSourceRequest
     ): Promise<SourceResponse<ImageMetaData>> {
-        const requestParams: BaseSourceRequest = {
+        const requestParams: LoliconLikeSourceRequest = {
             r18: props.r18 ? 1 : 0,
             num: 1,
             size: props.size,
@@ -66,7 +66,7 @@ export abstract class BaseLoliconProvider extends SourceProvider {
             proxy: props.proxy
         }
 
-        const res = await context.http.post<BaseResponse>(
+        const res = await context.http.post<LoliconLikeResponse>(
             this.RANDOM_IMAGE_URL,
             requestParams,
             {
@@ -124,4 +124,15 @@ export abstract class BaseLoliconProvider extends SourceProvider {
             referer: 'https://www.pixiv.net/'
         }
     }
+}
+
+
+export class LolisukiSourceProvider extends LoliconLikeProvider {
+    static description = '通过 Lolisuki API 获取图片'
+    protected RANDOM_IMAGE_URL = 'https://lolisuki.cn/api/setu/v1'
+}
+
+export class LoliconSourceProvider extends LoliconLikeProvider {
+    static description = '通过 Lolicon API 获取图片'
+    protected RANDOM_IMAGE_URL = 'https://api.lolicon.app/setu/v2'
 }

@@ -1,5 +1,5 @@
 import { Context, h } from 'koishi'
-import { Providers } from '../providers/main'
+import { Providers } from '../providers'
 import Config from '../config'
 
 export function commandSource(ctx: Context, config: Config) {

@@ -1,4 +1,4 @@
-import { Context } from 'koishi'
+import { Context, Element } from 'koishi'
 import type { Config } from '../../config'
 import type {
     GeneralImageData,
@@ -9,6 +9,7 @@ import type {
 import { SourceProvider } from '../../utils/type'
 import { logger } from '../../index'
 import { fetchImageBuffer, USER_AGENT } from '../../utils/request'
+import { createAtMessage, renderImageMessage } from '../../utils/messageBuilder'
 
 interface PixivIllustResponse {
     error: boolean
@@ -197,6 +198,27 @@ export class PixivGetByID extends SourceProvider {
             aiType: result.data.raw.aiType,
             uploadDate: result.data.raw.uploadDate,
             urls: result.data.raw.urls
+        }
+    }
+
+    async getImageWithAtMessage(
+        userId: string,
+        options: { pid: string; page: number }
+    ): Promise<string | Element> {
+        if (!options.pid) {
+            return createAtMessage(userId, '请提供作品 ID (PID)')
+        }
+
+        try {
+            const imageData = await this.getImageWithBuffer(
+                options.pid,
+                options.page
+            )
+            return renderImageMessage(imageData)
+        } catch (e) {
+            this.ctx.logger.error(e)
+            const errorMessage = e instanceof Error ? e.message : String(e)
+            return createAtMessage(userId, errorMessage || '获取图片失败')
         }
     }
 }
