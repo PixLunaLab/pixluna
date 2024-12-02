@@ -156,10 +156,6 @@ export const Config: Schema<Config> = Schema.intersect([
         }).description('Pixiv 设置')
     }),
 
-    Schema.object({
-        isLog: Schema.boolean().default(false).description('是否输出debug日志')
-    }).description('日志设置'),
-
     // Danbooru 设置
     Schema.object({
         danbooru: Schema.object({
@@ -287,7 +283,12 @@ export const Config: Schema<Config> = Schema.intersect([
                 .default([])
                 .description('Yande.re API 鉴权信息')
         }).description('Yande.re 设置')
-    })
+    }),
+
+    // 日志设置
+    Schema.object({
+        isLog: Schema.boolean().default(false).description('是否输出debug日志')
+    }).description('日志设置'),
 ])
 
 export const name = 'pixluna'
