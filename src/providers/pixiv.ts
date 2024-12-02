@@ -10,7 +10,7 @@ import type {
 import { SourceProvider } from '../utils/type'
 import { shuffleArray } from '../utils/shuffle'
 import { logger } from '../index'
-import { USER_AGENT, fetchImageBuffer } from '../utils/request'
+import { fetchImageBuffer, USER_AGENT } from '../utils/request'
 import { createAtMessage, renderImageMessage } from '../utils/messageBuilder'
 
 interface PixivIllustResponse {
@@ -45,7 +45,7 @@ interface PixivUserProfileResponse {
     error: boolean
     body: {
         illusts: {
-            [key: string]: any  // 作品ID作为键
+            [key: string]: any // 作品ID作为键
         }
     }
 }
@@ -85,7 +85,10 @@ abstract class PixivBaseProvider extends SourceProvider {
         return originalUrl.replace('i.pximg.net', baseUrl)
     }
 
-    protected async fetchPixivData<T>(context: Context, url: string): Promise<T> {
+    protected async fetchPixivData<T>(
+        context: Context,
+        url: string
+    ): Promise<T> {
         return await context.http.get<T>(url, {
             headers: this.getHeaders(),
             proxyAgent: this.getProxyAgent()
@@ -106,7 +109,8 @@ abstract class PixivBaseProvider extends SourceProvider {
 // Discovery
 export class PixivDiscoveryProvider extends PixivBaseProvider {
     static DISCOVERY_URL = 'https://www.pixiv.net/ajax/illust/discovery'
-    static ILLUST_PAGES_URL = 'https://www.pixiv.net/ajax/illust/{ARTWORK_ID}/pages'
+    static ILLUST_PAGES_URL =
+        'https://www.pixiv.net/ajax/illust/{ARTWORK_ID}/pages'
 
     async getMetaData(
         { context }: { context: Context },
@@ -114,7 +118,10 @@ export class PixivDiscoveryProvider extends PixivBaseProvider {
     ): Promise<SourceResponse<ImageMetaData>> {
         try {
             const url = `${PixivDiscoveryProvider.DISCOVERY_URL}?mode=${props.r18 ? 'r18' : 'all'}&limit=8`
-            const discoveryRes = await this.fetchPixivData<PixivResponse>(context, url)
+            const discoveryRes = await this.fetchPixivData<PixivResponse>(
+                context,
+                url
+            )
 
             if (discoveryRes.error || !discoveryRes.body.illusts.length) {
                 return {
@@ -130,13 +137,10 @@ export class PixivDiscoveryProvider extends PixivBaseProvider {
                     '{ARTWORK_ID}',
                     selectedIllust.id
                 )
-            const illustPagesRes = await context.http.get(
-                illustPagesUrl,
-                {
-                    headers: this.getHeaders(),
-                    proxyAgent: this.getProxyAgent()
-                }
-            )
+            const illustPagesRes = await context.http.get(illustPagesUrl, {
+                headers: this.getHeaders(),
+                proxyAgent: this.getProxyAgent()
+            })
 
             if (illustPagesRes.error || !illustPagesRes.body.length) {
                 return { status: 'error', data: new Error('无法获取原图链接') }
@@ -181,13 +185,24 @@ export class PixivDiscoveryProvider extends PixivBaseProvider {
 // Following
 export class PixivFollowingProvider extends PixivBaseProvider {
     static description = '获取 Pixiv 已关注画师作品，需要 Pixiv 账号'
-    static FOLLOWING_URL = 'https://www.pixiv.net/ajax/user/{USER_ID}/following?offset={OFFSET_COUNT}&limit={LIMIT_COUNT}&rest=show'
-    static USER_PROFILE_URL = 'https://www.pixiv.net/ajax/user/{USER_ID}/profile/all'
+    static FOLLOWING_URL =
+        'https://www.pixiv.net/ajax/user/{USER_ID}/following?offset={OFFSET_COUNT}&limit={LIMIT_COUNT}&rest=show'
+
+    static USER_PROFILE_URL =
+        'https://www.pixiv.net/ajax/user/{USER_ID}/profile/all'
+
     static ILLUST_URL = 'https://www.pixiv.net/ajax/illust/{ARTWORK_ID}'
 
-    async getMetaData({ context }: { context: Context }): Promise<SourceResponse<ImageMetaData>> {
+    async getMetaData({
+        context
+    }: {
+        context: Context
+    }): Promise<SourceResponse<ImageMetaData>> {
         if (!this.config.pixiv.phpSESSID) {
-            return { status: 'error', data: new Error('未设置 Pixiv PHPSESSID') }
+            return {
+                status: 'error',
+                data: new Error('未设置 Pixiv PHPSESSID')
+            }
         }
 
         try {
@@ -427,7 +442,10 @@ export class PixivGetByIDProvider extends PixivBaseProvider {
         context: Context,
         illustId: string
     ): Promise<PixivIllustResponse> {
-        const url = PixivGetByIDProvider.ILLUST_URL.replace('{ARTWORK_ID}', illustId)
+        const url = PixivGetByIDProvider.ILLUST_URL.replace(
+            '{ARTWORK_ID}',
+            illustId
+        )
         return await context.http.get<PixivIllustResponse>(url, {
             headers: this.getHeaders(),
             proxyAgent: this.getProxyAgent()
