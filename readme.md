@@ -73,3 +73,8 @@ pixluna -n 5 黑丝
 <a href="https://github.com/PixLunaLab/pixluna/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=PixLunaLab/pixluna" />
 </a>
+
+## 特别鸣谢
+
+- [koishi-plugin-booru](https://github.com/koishijs/koishi-plugin-booru) 提供的部分图源实现代码
+- [@rinkuto/koishi-plugin-pixiv](https://github.com/rinkuto/koishi-plugin-pixiv) 提供的最初插件实现思路
