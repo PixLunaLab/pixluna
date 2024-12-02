@@ -24,6 +24,9 @@ export interface Config {
     danbooru?: {
         keyPairs: { login: string; apiKey: string }[]
     }
+    e621?: {
+        keyPairs: { login: string; apiKey: string }[]
+    }
 }
 
 export const Config: Schema<Config> = Schema.intersect([
@@ -139,6 +142,18 @@ export const Config: Schema<Config> = Schema.intersect([
                 })
             ).default([]).description('Danbooru API 鉴权信息')
         }).description('Danbooru 设置')
+    }),
+
+    // E621 设置
+    Schema.object({
+        e621: Schema.object({
+            keyPairs: Schema.array(
+                Schema.object({
+                    login: Schema.string().required().description('E621 用户名'),
+                    apiKey: Schema.string().required().role('secret').description('E621 API Key')
+                })
+            ).default([]).description('E621 API 鉴权信息')
+        }).description('E621 设置')
     }),
 ])
 

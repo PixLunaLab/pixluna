@@ -11,6 +11,7 @@ import {
 import type { Config } from './config'
 import { shuffleArray } from './utils/shuffle'
 import { DanbooruSourceProvider } from './providers/danbooru'
+import { E621SourceProvider } from './providers/e621'
 
 export type ProviderTypes =
     | 'lolicon'
@@ -18,6 +19,7 @@ export type ProviderTypes =
     | 'pdiscovery'
     | 'pfollowing'
     | 'danbooru'
+    | 'e621'
 
 export const Providers: {
     [K in ProviderTypes]: typeof SourceProvider & { description: string }
@@ -26,7 +28,8 @@ export const Providers: {
     lolisuki: LolisukiSourceProvider,
     pdiscovery: PixivDiscoverySourceProvider,
     pfollowing: PixivFollowingSourceProvider,
-    danbooru: DanbooruSourceProvider
+    danbooru: DanbooruSourceProvider,
+    e621: E621SourceProvider
 }
 
 export function getProvider(
