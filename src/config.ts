@@ -42,6 +42,12 @@ export interface Config {
         }[]
         userAgent?: string
     }
+    konachan?: {
+        keyPairs: { login: string; password: string }[]
+    }
+    yande?: {
+        keyPairs: { login: string; password: string }[]
+    }
 }
 
 export const Config: Schema<Config> = Schema.intersect([
@@ -113,13 +119,15 @@ export const Config: Schema<Config> = Schema.intersect([
                 Schema.const('danbooru').description('Danbooru API'),
                 Schema.const('e621').description('E621 API'),
                 Schema.const('gelbooru').description('Gelbooru API'),
+                Schema.const('konachan').description('Konachan API'),
                 Schema.const('lolibooru').description('Lolibooru API'),
                 Schema.const('lolicon').description('Lolicon API'),
                 Schema.const('lolisuki').description('Lolisuki API'),
                 Schema.const('pdiscovery').description('Pixiv Discovery'),
                 Schema.const('pfollowing').description('Pixiv Following'),
                 Schema.const('safebooru').description('Safebooru API'),
-                Schema.const('sankaku').description('Sankaku API')
+                Schema.const('sankaku').description('Sankaku API'),
+                Schema.const('yande').description('Yande.re API')
             ])
         )
             .description('选择默认图片来源（可多选）')
@@ -248,7 +256,37 @@ export const Config: Schema<Config> = Schema.intersect([
                     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
                 )
                 .description('User Agent')
-        }).description('Sankaku Complex 设置')
+        }).description('Sankaku Complex 设置'),
+        konachan: Schema.object({
+            keyPairs: Schema.array(
+                Schema.object({
+                    login: Schema.string()
+                        .required()
+                        .description('Konachan 用户名'),
+                    password: Schema.string()
+                        .required()
+                        .role('secret')
+                        .description('Konachan 密码')
+                })
+            )
+                .default([])
+                .description('Konachan API 鉴权信息')
+        }).description('Konachan 设置'),
+        yande: Schema.object({
+            keyPairs: Schema.array(
+                Schema.object({
+                    login: Schema.string()
+                        .required()
+                        .description('Yande.re 用户名'),
+                    password: Schema.string()
+                        .required()
+                        .role('secret')
+                        .description('Yande.re 密码')
+                })
+            )
+                .default([])
+                .description('Yande.re API 鉴权信息')
+        }).description('Yande.re 设置')
     })
 ])
 

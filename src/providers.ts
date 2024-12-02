@@ -3,6 +3,7 @@ import { SourceProvider } from './utils/type'
 import { DanbooruSourceProvider } from './providers/danbooru'
 import { E621SourceProvider } from './providers/e621'
 import { GelbooruSourceProvider } from './providers/gelbooru'
+import { KonachanSourceProvider } from './providers/konachan'
 import { LolibooruSourceProvider } from './providers/lolibooru'
 import {
     LoliconSourceProvider,
@@ -14,6 +15,7 @@ import {
 } from './providers/pixiv'
 import { SafebooruSourceProvider } from './providers/safebooru'
 import { SankakuSourceProvider } from './providers/sankaku'
+import { YandeSourceProvider } from './providers/yande'
 import type { Config } from './config'
 import { shuffleArray } from './utils/shuffle'
 
@@ -21,6 +23,7 @@ export type ProviderTypes =
     | 'danbooru'
     | 'e621'
     | 'gelbooru'
+    | 'konachan'
     | 'lolibooru'
     | 'lolicon'
     | 'lolisuki'
@@ -28,6 +31,7 @@ export type ProviderTypes =
     | 'pfollowing'
     | 'safebooru'
     | 'sankaku'
+    | 'yande'
 
 export const Providers: {
     [K in ProviderTypes]: typeof SourceProvider & { description: string }
@@ -35,13 +39,15 @@ export const Providers: {
     danbooru: DanbooruSourceProvider,
     e621: E621SourceProvider,
     gelbooru: GelbooruSourceProvider,
+    konachan: KonachanSourceProvider,
     lolibooru: LolibooruSourceProvider,
     lolicon: LoliconSourceProvider,
     lolisuki: LolisukiSourceProvider,
     pdiscovery: PixivDiscoverySourceProvider,
     pfollowing: PixivFollowingSourceProvider,
     safebooru: SafebooruSourceProvider,
-    sankaku: SankakuSourceProvider
+    sankaku: SankakuSourceProvider,
+    yande: YandeSourceProvider
 }
 
 export function getProvider(
