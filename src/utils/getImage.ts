@@ -1,6 +1,6 @@
 import { Context } from 'koishi'
 import type Config from '../config'
-import { PixivGetByID } from '../providers/pixiv'
+import { PixivGetByIDProvider } from '../providers/pixiv'
 
 export async function getPixivImageByID(
     ctx: Context,
@@ -8,6 +8,6 @@ export async function getPixivImageByID(
     userId: string,
     options: { pid: string; page: number }
 ) {
-    const provider = new PixivGetByID(ctx, config)
+    const provider = new PixivGetByIDProvider(ctx, config)
     return provider.getImageWithAtMessage(userId, options)
 }

@@ -126,7 +126,7 @@ export abstract class LoliconLikeProvider extends SourceProvider {
     }
 }
 
-
+// export source
 export class LolisukiSourceProvider extends LoliconLikeProvider {
     static description = '通过 Lolisuki API 获取图片'
     protected RANDOM_IMAGE_URL = 'https://lolisuki.cn/api/setu/v1'
