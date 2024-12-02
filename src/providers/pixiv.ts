@@ -107,7 +107,7 @@ abstract class PixivBaseProvider extends SourceProvider {
 }
 
 // Discovery
-export class PixivDiscoveryProvider extends PixivBaseProvider {
+export class PixivDiscoverySourceProvider extends PixivBaseProvider {
     static DISCOVERY_URL = 'https://www.pixiv.net/ajax/illust/discovery'
     static ILLUST_PAGES_URL =
         'https://www.pixiv.net/ajax/illust/{ARTWORK_ID}/pages'
@@ -117,7 +117,7 @@ export class PixivDiscoveryProvider extends PixivBaseProvider {
         props: CommonSourceRequest
     ): Promise<SourceResponse<ImageMetaData>> {
         try {
-            const url = `${PixivDiscoveryProvider.DISCOVERY_URL}?mode=${props.r18 ? 'r18' : 'all'}&limit=8`
+            const url = `${PixivDiscoverySourceProvider.DISCOVERY_URL}?mode=${props.r18 ? 'r18' : 'all'}&limit=8`
             const discoveryRes = await this.fetchPixivData<PixivResponse>(
                 context,
                 url
@@ -133,7 +133,7 @@ export class PixivDiscoveryProvider extends PixivBaseProvider {
             const selectedIllust = shuffleArray(discoveryRes.body.illusts)[0]
 
             const illustPagesUrl =
-                PixivDiscoveryProvider.ILLUST_PAGES_URL.replace(
+                PixivDiscoverySourceProvider.ILLUST_PAGES_URL.replace(
                     '{ARTWORK_ID}',
                     selectedIllust.id
                 )
@@ -183,7 +183,7 @@ export class PixivDiscoveryProvider extends PixivBaseProvider {
 }
 
 // Following
-export class PixivFollowingProvider extends PixivBaseProvider {
+export class PixivFollowingSourceProvider extends PixivBaseProvider {
     static description = '获取 Pixiv 已关注画师作品，需要 Pixiv 账号'
     static FOLLOWING_URL =
         'https://www.pixiv.net/ajax/user/{USER_ID}/following?offset={OFFSET_COUNT}&limit={LIMIT_COUNT}&rest=show'
@@ -306,7 +306,7 @@ export class PixivFollowingProvider extends PixivBaseProvider {
         const allUsers = []
 
         while (true) {
-            const url = PixivFollowingProvider.FOLLOWING_URL.replace(
+            const url = PixivFollowingSourceProvider.FOLLOWING_URL.replace(
                 '{USER_ID}',
                 this.config.pixiv.following.userId
             )
@@ -331,7 +331,7 @@ export class PixivFollowingProvider extends PixivBaseProvider {
         context: Context,
         userId: string
     ): Promise<PixivUserProfileResponse> {
-        const url = PixivFollowingProvider.USER_PROFILE_URL.replace(
+        const url = PixivFollowingSourceProvider.USER_PROFILE_URL.replace(
             '{USER_ID}',
             userId
         )
@@ -342,7 +342,7 @@ export class PixivFollowingProvider extends PixivBaseProvider {
         context: Context,
         illustId: string
     ): Promise<PixivIllustResponse> {
-        const url = PixivFollowingProvider.ILLUST_URL.replace(
+        const url = PixivFollowingSourceProvider.ILLUST_URL.replace(
             '{ARTWORK_ID}',
             illustId
         )
