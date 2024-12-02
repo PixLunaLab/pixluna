@@ -21,6 +21,9 @@ export interface Config {
             limit: number
         }
     }
+    danbooru?: {
+        keyPairs: { login: string; apiKey: string }[]
+    }
 }
 
 export const Config: Schema<Config> = Schema.intersect([
@@ -92,7 +95,8 @@ export const Config: Schema<Config> = Schema.intersect([
                 Schema.const('lolicon').description('Lolicon API'),
                 Schema.const('lolisuki').description('Lolisuki API'),
                 Schema.const('pdiscovery').description('Pixiv Discovery'),
-                Schema.const('pfollowing').description('Pixiv Following')
+                Schema.const('pfollowing').description('Pixiv Following'),
+                Schema.const('danbooru').description('Danbooru API')
             ])
         )
             .description('选择默认图片来源（可多选）')
@@ -123,7 +127,19 @@ export const Config: Schema<Config> = Schema.intersect([
 
     Schema.object({
         isLog: Schema.boolean().default(false).description('是否输出debug日志')
-    }).description('日志设置')
+    }).description('日志设置'),
+
+    // Danbooru 设置
+    Schema.object({
+        danbooru: Schema.object({
+            keyPairs: Schema.array(
+                Schema.object({
+                    login: Schema.string().required().description('Danbooru 用户名'),
+                    apiKey: Schema.string().required().role('secret').description('Danbooru API Key')
+                })
+            ).default([]).description('Danbooru API 鉴权信息')
+        }).description('Danbooru 设置')
+    }),
 ])
 
 export const name = 'pixluna'
