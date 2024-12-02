@@ -30,6 +30,9 @@ export interface Config {
     gelbooru?: {
         keyPairs: { apiKey: string }[]
     }
+    lolibooru?: {
+        keyPairs: { login: string; password: string }[]
+    }
 }
 
 export const Config: Schema<Config> = Schema.intersect([
@@ -102,7 +105,9 @@ export const Config: Schema<Config> = Schema.intersect([
                 Schema.const('lolisuki').description('Lolisuki API'),
                 Schema.const('pdiscovery').description('Pixiv Discovery'),
                 Schema.const('pfollowing').description('Pixiv Following'),
-                Schema.const('danbooru').description('Danbooru API')
+                Schema.const('gelbooru').description('Gelbooru API'),
+                Schema.const('danbooru').description('Danbooru API'),
+                Schema.const('e621').description('E621 API')
             ])
         )
             .description('选择默认图片来源（可多选）')
@@ -140,10 +145,17 @@ export const Config: Schema<Config> = Schema.intersect([
         danbooru: Schema.object({
             keyPairs: Schema.array(
                 Schema.object({
-                    login: Schema.string().required().description('Danbooru 用户名'),
-                    apiKey: Schema.string().required().role('secret').description('Danbooru API Key')
+                    login: Schema.string()
+                        .required()
+                        .description('Danbooru 用户名'),
+                    apiKey: Schema.string()
+                        .required()
+                        .role('secret')
+                        .description('Danbooru API Key')
                 })
-            ).default([]).description('Danbooru API 鉴权信息')
+            )
+                .default([])
+                .description('Danbooru API 鉴权信息')
         }).description('Danbooru 设置')
     }),
 
@@ -152,10 +164,17 @@ export const Config: Schema<Config> = Schema.intersect([
         e621: Schema.object({
             keyPairs: Schema.array(
                 Schema.object({
-                    login: Schema.string().required().description('E621 用户名'),
-                    apiKey: Schema.string().required().role('secret').description('E621 API Key')
+                    login: Schema.string()
+                        .required()
+                        .description('E621 用户名'),
+                    apiKey: Schema.string()
+                        .required()
+                        .role('secret')
+                        .description('E621 API Key')
                 })
-            ).default([]).description('E621 API 鉴权信息')
+            )
+                .default([])
+                .description('E621 API 鉴权信息')
         }).description('E621 设置')
     }),
 
@@ -164,11 +183,35 @@ export const Config: Schema<Config> = Schema.intersect([
         gelbooru: Schema.object({
             keyPairs: Schema.array(
                 Schema.object({
-                    apiKey: Schema.string().required().role('secret').description('Gelbooru API Key')
+                    apiKey: Schema.string()
+                        .required()
+                        .role('secret')
+                        .description('Gelbooru API Key')
                 })
-            ).default([]).description('Gelbooru API 鉴权信息')
+            )
+                .default([])
+                .description('Gelbooru API 鉴权信息')
         }).description('Gelbooru 设置')
     }),
+
+    // Lolibooru 设置
+    Schema.object({
+        lolibooru: Schema.object({
+            keyPairs: Schema.array(
+                Schema.object({
+                    login: Schema.string()
+                        .required()
+                        .description('Lolibooru 用户名'),
+                    password: Schema.string()
+                        .required()
+                        .role('secret')
+                        .description('Lolibooru 密码')
+                })
+            )
+                .default([])
+                .description('Lolibooru API 鉴权信息')
+        }).description('Lolibooru 设置')
+    })
 ])
 
 export const name = 'pixluna'

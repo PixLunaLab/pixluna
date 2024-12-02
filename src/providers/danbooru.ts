@@ -49,7 +49,9 @@ export class DanbooruSourceProvider extends SourceProvider {
                 tags: props.tag ? props.tag.replace(/\|/g, ' ') : '',
                 random: true,
                 limit: 1,
-                ...(keyPair ? { login: keyPair.login, api_key: keyPair.apiKey } : {})
+                ...(keyPair
+                    ? { login: keyPair.login, api_key: keyPair.apiKey }
+                    : {})
             }
 
             if (props.r18) {

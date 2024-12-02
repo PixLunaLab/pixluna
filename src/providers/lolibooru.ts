@@ -1,4 +1,5 @@
 import { Context } from 'koishi'
+import { createHash } from 'node:crypto'
 import { Config } from '../config'
 import {
     CommonSourceRequest,
@@ -10,42 +11,45 @@ import {
 } from '../utils/type'
 import { logger } from '../index'
 
-interface E621Post {
+interface LolibooruPost {
     id: number
     created_at: string
-    file: {
-        url: string
-    }
-    sample: {
-        url: string
-    }
-    preview: {
-        url: string
-    }
-    tags: {
-        artist: string[]
-        general: string[]
-        // ... 其他tag类型
-    }
-    description: string
+    file_url: string
+    sample_url: string
+    preview_url: string
+    tags: string
+    author: string
+    source: string
     rating: string
 }
 
-export class E621SourceProvider extends SourceProvider {
-    static description = '通过 E621 API 获取图片'
-    protected endpoint = 'https://e621.net'
-    private keyPairs: { login: string; apiKey: string }[] = []
+function hashPassword(password: string) {
+    const salted = `--${password}--`
+    const hash = createHash('sha1')
+    hash.update(salted)
+    return hash.digest('hex')
+}
+
+export class LolibooruSourceProvider extends SourceProvider {
+    static description = '通过 Lolibooru API 获取图片'
+    protected endpoint = 'https://lolibooru.moe'
+    private keyPairs: { login: string; password: string }[] = []
 
     setConfig(config: Config): void {
         this.config = config
-        if (config.e621?.keyPairs?.length) {
-            this.keyPairs = config.e621.keyPairs
+        if (config.lolibooru?.keyPairs?.length) {
+            this.keyPairs = config.lolibooru.keyPairs
         }
     }
 
     private get keyPair() {
         if (!this.keyPairs.length) return
-        return this.keyPairs[Math.floor(Math.random() * this.keyPairs.length)]
+        const key =
+            this.keyPairs[Math.floor(Math.random() * this.keyPairs.length)]
+        return {
+            login: key.login,
+            password_hash: hashPassword(key.password)
+        }
     }
 
     async getMetaData(
@@ -54,9 +58,9 @@ export class E621SourceProvider extends SourceProvider {
     ): Promise<SourceResponse<ImageMetaData>> {
         try {
             const keyPair = this.keyPair
-            const params: Record<string, any> = {
+            const params: Record<string, string> = {
                 tags: `${props.tag ? props.tag.replace(/\|/g, ' ') : ''} order:random`,
-                limit: 1
+                limit: '1'
             }
 
             if (props.r18) {
@@ -65,51 +69,43 @@ export class E621SourceProvider extends SourceProvider {
                 params.tags += ' rating:s'
             }
 
-            const headers: Record<string, string> = {
-                'User-Agent': 'PixLuna/1.0'
-            }
-
             if (keyPair) {
-                headers['Authorization'] =
-                    'Basic ' +
-                    Buffer.from(`${keyPair.login}:${keyPair.apiKey}`).toString(
-                        'base64'
-                    )
+                params.login = keyPair.login
+                params.password_hash = keyPair.password_hash
             }
 
-            const res = await context.http.get<{ posts: E621Post[] }>(
-                `${this.endpoint}/posts.json`,
+            const res = await context.http.get<LolibooruPost[]>(
+                `${this.endpoint}/post/index.json`,
                 {
                     params,
-                    headers,
                     proxyAgent: this.config.isProxy
                         ? this.config.proxyHost
                         : undefined
                 }
             )
 
-            if (!Array.isArray(res.posts) || res.posts.length === 0) {
+            if (!Array.isArray(res) || res.length === 0) {
                 return {
                     status: 'error',
                     data: new Error('No image data returned')
                 }
             }
 
-            const post = res.posts[0]
-            const url = this.config.compress ? post.sample.url : post.file.url
+            const post = res[0]
+            const url = this.config.compress ? post.sample_url : post.file_url
 
             const generalImageData: GeneralImageData = {
                 id: post.id,
-                title: '',
-                author: post.tags.artist.join(', '),
-                r18: post.rating !== 's',
-                tags: [...post.tags.general, ...post.tags.artist],
-                extension: post.file.url.split('.').pop(),
+                title: post.source || `Lolibooru - ${post.id}`,
+                author: post.author.replace(/_/g, ' '),
+                r18: ['e', 'q'].includes(post.rating),
+                tags: post.tags.split(' '),
+                extension: post.file_url.split('.').pop(),
                 aiType: 0,
                 uploadDate: new Date(post.created_at).getTime(),
                 urls: {
-                    original: post.file.url,
-                    regular: post.sample.url
+                    original: encodeURI(post.file_url),
+                    regular: encodeURI(post.sample_url)
                 }
             }
 
@@ -118,10 +114,10 @@ export class E621SourceProvider extends SourceProvider {
             return {
                 status: 'success',
                 data: {
-                    url,
+                    url: encodeURI(url),
                     urls: {
-                        regular: post.sample.url,
-                        original: post.file.url
+                        regular: encodeURI(post.sample_url),
+                        original: encodeURI(post.file_url)
                     },
                     raw: generalImageData
                 }
@@ -136,7 +132,7 @@ export class E621SourceProvider extends SourceProvider {
 
     getMeta(): ImageSourceMeta {
         return {
-            referer: 'https://e621.net'
+            referer: 'https://lolibooru.moe'
         }
     }
 }

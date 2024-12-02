@@ -13,6 +13,8 @@ import { shuffleArray } from './utils/shuffle'
 import { DanbooruSourceProvider } from './providers/danbooru'
 import { E621SourceProvider } from './providers/e621'
 import { GelbooruSourceProvider } from './providers/gelbooru'
+import { LolibooruSourceProvider } from './providers/lolibooru'
+import { SafebooruSourceProvider } from './providers/safebooru'
 
 export type ProviderTypes =
     | 'lolicon'
@@ -22,6 +24,8 @@ export type ProviderTypes =
     | 'danbooru'
     | 'e621'
     | 'gelbooru'
+    | 'lolibooru'
+    | 'safebooru'
 
 export const Providers: {
     [K in ProviderTypes]: typeof SourceProvider & { description: string }
@@ -32,7 +36,9 @@ export const Providers: {
     pfollowing: PixivFollowingSourceProvider,
     danbooru: DanbooruSourceProvider,
     e621: E621SourceProvider,
-    gelbooru: GelbooruSourceProvider
+    gelbooru: GelbooruSourceProvider,
+    lolibooru: LolibooruSourceProvider,
+    safebooru: SafebooruSourceProvider
 }
 
 export function getProvider(

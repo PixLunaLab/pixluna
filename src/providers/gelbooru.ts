@@ -30,7 +30,9 @@ export class GelbooruSourceProvider extends SourceProvider {
 
     private get keyPair() {
         const pairs = this.config.gelbooru?.keyPairs || []
-        return pairs.length ? pairs[Math.floor(Math.random() * pairs.length)] : null
+        return pairs.length
+            ? pairs[Math.floor(Math.random() * pairs.length)]
+            : null
     }
 
     async getMetaData(
@@ -52,10 +54,12 @@ export class GelbooruSourceProvider extends SourceProvider {
         }
 
         const url = `${this.endpoint}?${params.toString()}`
-        
+
         try {
             const res = await context.http.get<GelbooruResponse>(url, {
-                proxyAgent: this.config.isProxy ? this.config.proxyHost : undefined
+                proxyAgent: this.config.isProxy
+                    ? this.config.proxyHost
+                    : undefined
             })
 
             if (!res.post?.length) {
@@ -111,4 +115,4 @@ export class GelbooruSourceProvider extends SourceProvider {
     setConfig(config: Config) {
         this.config = config
     }
-} 
+}
