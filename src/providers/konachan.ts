@@ -70,7 +70,8 @@ export class KonachanSourceProvider extends SourceProvider {
             }
 
             if (props.r18) {
-                params.tags = `${params.tags} rating:questionable rating:explicit`.trim()
+                params.tags =
+                    `${params.tags} rating:questionable rating:explicit`.trim()
             } else {
                 params.tags = `${params.tags} rating:safe`.trim()
             }
