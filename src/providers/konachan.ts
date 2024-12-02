@@ -59,21 +59,23 @@ export class KonachanSourceProvider extends SourceProvider {
         try {
             const keyPair = this.keyPair
             const params: Record<string, any> = {
-                tags: `${props.tag?.replace(/\|/g, ' ') || ''} order:random`,
+                tags: `order:random ${props.tag?.replace(/\|/g, ' ') || ''}`.trim(),
                 limit: 1,
-                ...(keyPair
-                    ? {
-                          login: keyPair.login,
-                          password_hash: keyPair.password_hash
-                      }
-                    : {})
+                api_version: 2,
+                ...(keyPair && {
+                    login: keyPair.login,
+                    password_hash: keyPair.password_hash,
+                    auth: true
+                })
             }
 
             if (props.r18) {
-                params.tags += ' rating:explicit'
+                params.tags = `${params.tags} rating:questionable rating:explicit`.trim()
             } else {
-                params.tags += ' rating:safe'
+                params.tags = `${params.tags} rating:safe`.trim()
             }
+
+            logger.debug('请求参数', params)
 
             const res = await context.http.get<KonachanPost[]>(
                 `${this.endpoint}/post.json`,
@@ -124,6 +126,7 @@ export class KonachanSourceProvider extends SourceProvider {
                 }
             }
         } catch (error) {
+            logger.error('Konachan请求失败', error)
             return {
                 status: 'error',
                 data: error
