@@ -1,5 +1,9 @@
 import { Context } from 'koishi'
 import { SourceProvider } from './utils/type'
+import { DanbooruSourceProvider } from './providers/danbooru'
+import { E621SourceProvider } from './providers/e621'
+import { GelbooruSourceProvider } from './providers/gelbooru'
+import { LolibooruSourceProvider } from './providers/lolibooru'
 import {
     LoliconSourceProvider,
     LolisukiSourceProvider
@@ -8,37 +12,36 @@ import {
     PixivDiscoverySourceProvider,
     PixivFollowingSourceProvider
 } from './providers/pixiv'
+import { SafebooruSourceProvider } from './providers/safebooru'
+import { SankakuSourceProvider } from './providers/sankaku'
 import type { Config } from './config'
 import { shuffleArray } from './utils/shuffle'
-import { DanbooruSourceProvider } from './providers/danbooru'
-import { E621SourceProvider } from './providers/e621'
-import { GelbooruSourceProvider } from './providers/gelbooru'
-import { LolibooruSourceProvider } from './providers/lolibooru'
-import { SafebooruSourceProvider } from './providers/safebooru'
 
 export type ProviderTypes =
-    | 'lolicon'
-    | 'lolisuki'
-    | 'pdiscovery'
-    | 'pfollowing'
     | 'danbooru'
     | 'e621'
     | 'gelbooru'
     | 'lolibooru'
+    | 'lolicon'
+    | 'lolisuki'
+    | 'pdiscovery'
+    | 'pfollowing'
     | 'safebooru'
+    | 'sankaku'
 
 export const Providers: {
     [K in ProviderTypes]: typeof SourceProvider & { description: string }
 } = {
-    lolicon: LoliconSourceProvider,
-    lolisuki: LolisukiSourceProvider,
-    pdiscovery: PixivDiscoverySourceProvider,
-    pfollowing: PixivFollowingSourceProvider,
     danbooru: DanbooruSourceProvider,
     e621: E621SourceProvider,
     gelbooru: GelbooruSourceProvider,
     lolibooru: LolibooruSourceProvider,
-    safebooru: SafebooruSourceProvider
+    lolicon: LoliconSourceProvider,
+    lolisuki: LolisukiSourceProvider,
+    pdiscovery: PixivDiscoverySourceProvider,
+    pfollowing: PixivFollowingSourceProvider,
+    safebooru: SafebooruSourceProvider,
+    sankaku: SankakuSourceProvider
 }
 
 export function getProvider(

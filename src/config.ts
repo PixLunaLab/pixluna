@@ -33,6 +33,15 @@ export interface Config {
     lolibooru?: {
         keyPairs: { login: string; password: string }[]
     }
+    sankaku?: {
+        keyPairs: {
+            login: string
+            password: string
+            tokenType?: string
+            accessToken?: string
+        }[]
+        userAgent?: string
+    }
 }
 
 export const Config: Schema<Config> = Schema.intersect([
@@ -101,13 +110,16 @@ export const Config: Schema<Config> = Schema.intersect([
     Schema.object({
         defaultSourceProvider: Schema.array(
             Schema.union([
+                Schema.const('danbooru').description('Danbooru API'),
+                Schema.const('e621').description('E621 API'),
+                Schema.const('gelbooru').description('Gelbooru API'),
+                Schema.const('lolibooru').description('Lolibooru API'),
                 Schema.const('lolicon').description('Lolicon API'),
                 Schema.const('lolisuki').description('Lolisuki API'),
                 Schema.const('pdiscovery').description('Pixiv Discovery'),
                 Schema.const('pfollowing').description('Pixiv Following'),
-                Schema.const('gelbooru').description('Gelbooru API'),
-                Schema.const('danbooru').description('Danbooru API'),
-                Schema.const('e621').description('E621 API')
+                Schema.const('safebooru').description('Safebooru API'),
+                Schema.const('sankaku').description('Sankaku API')
             ])
         )
             .description('选择默认图片来源（可多选）')
@@ -211,6 +223,32 @@ export const Config: Schema<Config> = Schema.intersect([
                 .default([])
                 .description('Lolibooru API 鉴权信息')
         }).description('Lolibooru 设置')
+    }),
+
+    // Sankaku 设置
+    Schema.object({
+        sankaku: Schema.object({
+            keyPairs: Schema.array(
+                Schema.object({
+                    login: Schema.string()
+                        .required()
+                        .description('Sankaku Complex 用户名'),
+                    password: Schema.string()
+                        .required()
+                        .role('secret')
+                        .description('Sankaku Complex 密码'),
+                    tokenType: Schema.string().hidden().default('Bearer'),
+                    accessToken: Schema.string().hidden()
+                })
+            )
+                .default([])
+                .description('Sankaku Complex API 鉴权信息'),
+            userAgent: Schema.string()
+                .default(
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+                )
+                .description('User Agent')
+        }).description('Sankaku Complex 设置')
     })
 ])
 
