@@ -44,7 +44,8 @@ export class KonachanSourceProvider extends SourceProvider {
 
     private get keyPair() {
         if (!this.keyPairs.length) return
-        const key = this.keyPairs[Math.floor(Math.random() * this.keyPairs.length)]
+        const key =
+            this.keyPairs[Math.floor(Math.random() * this.keyPairs.length)]
         return {
             login: key.login,
             password_hash: this.hashPassword(key.password)
@@ -61,7 +62,10 @@ export class KonachanSourceProvider extends SourceProvider {
                 tags: `${props.tag?.replace(/\|/g, ' ') || ''} order:random`,
                 limit: 1,
                 ...(keyPair
-                    ? { login: keyPair.login, password_hash: keyPair.password_hash }
+                    ? {
+                          login: keyPair.login,
+                          password_hash: keyPair.password_hash
+                      }
                     : {})
             }
 
@@ -89,9 +93,7 @@ export class KonachanSourceProvider extends SourceProvider {
             }
 
             const post = res[0]
-            const url = this.config.compress
-                ? post.sample_url
-                : post.file_url
+            const url = this.config.compress ? post.sample_url : post.file_url
 
             const generalImageData: GeneralImageData = {
                 id: post.id,
@@ -134,4 +136,4 @@ export class KonachanSourceProvider extends SourceProvider {
             referer: 'https://konachan.com'
         }
     }
-} 
+}
