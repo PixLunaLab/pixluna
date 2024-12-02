@@ -27,6 +27,9 @@ export interface Config {
     e621?: {
         keyPairs: { login: string; apiKey: string }[]
     }
+    gelbooru?: {
+        keyPairs: { apiKey: string }[]
+    }
 }
 
 export const Config: Schema<Config> = Schema.intersect([
@@ -154,6 +157,17 @@ export const Config: Schema<Config> = Schema.intersect([
                 })
             ).default([]).description('E621 API 鉴权信息')
         }).description('E621 设置')
+    }),
+
+    // Gelbooru 设置
+    Schema.object({
+        gelbooru: Schema.object({
+            keyPairs: Schema.array(
+                Schema.object({
+                    apiKey: Schema.string().required().role('secret').description('Gelbooru API Key')
+                })
+            ).default([]).description('Gelbooru API 鉴权信息')
+        }).description('Gelbooru 设置')
     }),
 ])
 
