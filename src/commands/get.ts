@@ -1,5 +1,5 @@
 import { Context } from 'koishi'
-import { getPixivImageByID } from '../providers/getImage'
+import { getPixivImageByID } from '../utils/getImage'
 import Config from '../config'
 
 export function commandGet(ctx: Context, config: Config) {
