@@ -288,7 +288,7 @@ export const Config: Schema<Config> = Schema.intersect([
     // 日志设置
     Schema.object({
         isLog: Schema.boolean().default(false).description('是否输出debug日志')
-    }).description('日志设置'),
+    }).description('日志设置')
 ])
 
 export const name = 'pixluna'

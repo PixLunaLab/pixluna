@@ -23,9 +23,14 @@ interface E621Post {
         url: string
     }
     tags: {
-        artist: string[]
         general: string[]
-        // ... 其他tag类型
+        species: string[]
+        character: string[]
+        copyright: string[]
+        artist: string[]
+        invalid: unknown[]
+        lore: unknown[]
+        meta: string[]
     }
     description: string
     rating: string
