@@ -22,16 +22,19 @@
 ## 支持图源
 
 - [x] pixiv
+  - [x] discovery
+  - [x] following
 - [x] lolicon-like
-- [ ] danbooru
-- [ ] e621
-- [ ] gelbooru
-- [ ] konachan
-- [ ] lolibooru
-- [ ] moehu
-- [ ] safebooru
-- [ ] sakanku
-- [ ] yande
+  - [x] lolicon
+  - [x] lolisuki
+- [x] danbooru
+- [x] e621
+- [x] gelbooru
+- [x] konachan
+- [x] lolibooru
+- [x] safebooru
+- [x] sakanku
+- [x] yande
 
 ## TODO（画饼 ing...）
 
