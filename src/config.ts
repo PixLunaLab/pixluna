@@ -55,22 +55,22 @@ export const Config: Schema<Config> = Schema.intersect([
     Schema.object({
         isR18: Schema.boolean()
             .default(false)
-            .description('是否允许返回 R18 内容。'),
+            .description('是否允许返回 R18 内容'),
 
         excludeAI: Schema.boolean()
             .default(false)
-            .description('是否排除 AI 生成作品。'),
+            .description('是否排除 AI 生成作品'),
 
         maxConcurrency: Schema.number()
             .default(1)
-            .description('最大并发请求数。')
+            .description('最大并发请求数')
             .min(1)
             .max(10)
             .step(1),
 
         forwardMessage: Schema.boolean()
             .default(true)
-            .description('是否以转发消息格式发送图片。')
+            .description('是否以转发消息格式发送图片')
     }).description('通用设置'),
 
     // 图片处理设置
@@ -78,7 +78,7 @@ export const Config: Schema<Config> = Schema.intersect([
         imageProcessing: Schema.object({
             confusion: Schema.boolean()
                 .default(false)
-                .description('是否启用图片混淆处理。（对某些平台有奇效）'),
+                .description('是否启用图片混淆处理（对某些平台有奇效）'),
 
             compress: Schema.boolean()
                 .default(false)
@@ -95,7 +95,7 @@ export const Config: Schema<Config> = Schema.intersect([
 
             isFlip: Schema.boolean()
                 .default(false)
-                .description('是否启用图片翻转处理。'),
+                .description('是否启用图片翻转处理'),
 
             flipMode: Schema.union([
                 Schema.const('horizontal').description('水平翻转'),
@@ -112,7 +112,7 @@ export const Config: Schema<Config> = Schema.intersect([
         isR18: Schema.const(true),
         r18P: Schema.percent()
             .default(0.1)
-            .description('R18 内容出现的概率。')
+            .description('R18 内容出现的概率')
             .min(0)
             .max(1)
             .step(0.01)
@@ -120,13 +120,13 @@ export const Config: Schema<Config> = Schema.intersect([
 
     // 代理设置
     Schema.object({
-        isProxy: Schema.boolean().default(false).description('是否使用代理。'),
+        isProxy: Schema.boolean().default(false).description('是否使用代理'),
         proxyHost: Schema.string()
             .default('http://127.0.0.1:7890')
-            .description('代理服务器地址。'),
+            .description('代理服务器地址'),
         baseUrl: Schema.string()
             .default('i.pixiv.re')
-            .description('图片反代服务的地址。')
+            .description('图片反代服务的地址')
     }).description('代理设置'),
 
     // 图源设置
@@ -157,7 +157,7 @@ export const Config: Schema<Config> = Schema.intersect([
         pixiv: Schema.object({
             phpSESSID: Schema.string()
                 .description(
-                    'Pixiv 的 PHPSESSID，用于访问个性化内容。返回的图片分级取决于该 Pixiv 账号所有者的分级设置。'
+                    'Pixiv 的 PHPSESSID，用于访问个性化内容返回的图片分级取决于该 Pixiv 账号所有者的分级设置'
                 )
                 .role('secret')
                 .default(''),
