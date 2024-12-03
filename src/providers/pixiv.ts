@@ -308,7 +308,7 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
         while (true) {
             const url = PixivFollowingSourceProvider.FOLLOWING_URL.replace(
                 '{USER_ID}',
-                this.config.pixiv.following.userId
+                this.config.pixiv.userId
             )
                 .replace('{OFFSET_COUNT}', offset.toString())
                 .replace('{LIMIT_COUNT}', LIMIT.toString())

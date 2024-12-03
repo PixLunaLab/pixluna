@@ -16,10 +16,7 @@ export interface Config {
     isLog: boolean
     pixiv: {
         phpSESSID: string
-        following: {
-            userId: string
-            limit: number
-        }
+        userId: string
     }
     danbooru?: {
         keyPairs: { login: string; apiKey: string }[]
@@ -40,7 +37,6 @@ export interface Config {
             tokenType?: string
             accessToken?: string
         }[]
-        userAgent?: string
     }
     konachan?: {
         keyPairs: { login: string; password: string }[]
@@ -142,17 +138,11 @@ export const Config: Schema<Config> = Schema.intersect([
                 .description(
                     'Pixiv 的 PHPSESSID，用于访问个性化内容。返回的图片分级取决于该 Pixiv 账号所有者的分级设置。'
                 )
+                .role('secret')
                 .default(''),
-            following: Schema.object({
-                userId: Schema.string()
-                    .description('Pixiv 用户 ID，用于获取关注列表')
-                    .default(''),
-                limit: Schema.number()
-                    .description('获取关注列表的数量限制')
-                    .default(100)
-                    .min(1)
-                    .max(100)
-            }).description('Pixiv Following 设置')
+            userId: Schema.string()
+                .description('Pixiv 用户 ID，用于获取关注列表')
+                .default(''),
         }).description('Pixiv 设置')
     }),
 
@@ -246,12 +236,7 @@ export const Config: Schema<Config> = Schema.intersect([
                 })
             )
                 .default([])
-                .description('Sankaku Complex API 鉴权信息'),
-            userAgent: Schema.string()
-                .default(
-                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
-                )
-                .description('User Agent')
+                .description('Sankaku Complex API 鉴权信息')
         }).description('Sankaku Complex 设置'),
         konachan: Schema.object({
             keyPairs: Schema.array(

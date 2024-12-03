@@ -9,6 +9,7 @@ import type {
 } from '../utils/type'
 import { SourceProvider } from '../utils/type'
 import { logger } from '../index'
+import { USER_AGENT } from '../utils/request'
 
 interface SankakuPost {
     id: number
@@ -31,7 +32,7 @@ export class SankakuSourceProvider extends SourceProvider {
         super(ctx, config)
         this.http = ctx.http.extend({
             headers: {
-                'User-Agent': config.sankaku?.userAgent
+                'User-Agent': USER_AGENT
             },
             proxyAgent: config.isProxy ? config.proxyHost : undefined
         })
