@@ -1,7 +1,7 @@
 {
     "name": "koishi-plugin-pixluna",
     "description": "比较新的涩图插件（？",
-    "version": "2.3.0-beta.5",
+    "version": "2.3.0-beta.6",
     "main": "lib/index.js",
     "files": [
         "lib"

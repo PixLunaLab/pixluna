@@ -142,7 +142,7 @@ export const Config: Schema<Config> = Schema.intersect([
                 .default(''),
             userId: Schema.string()
                 .description('Pixiv 用户 ID，用于获取关注列表')
-                .default(''),
+                .default('')
         }).description('Pixiv 设置')
     }),
 
