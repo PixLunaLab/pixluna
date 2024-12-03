@@ -45,7 +45,7 @@ interface PixivUserProfileResponse {
     error: boolean
     body: {
         illusts: {
-            [key: string]: any // 作品ID作为键
+            [key: string]: any
         }
     }
 }
