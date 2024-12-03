@@ -1,7 +1,7 @@
 import { Context } from 'koishi'
 import { GeneralImageData, SourceProvider } from './type'
 import { taskTime } from './taskManager'
-import { mixImage, qualityImage } from './imageProcessing'
+import { processImage } from './imageProcessing'
 import { getProvider } from '../providers'
 import { logger } from '../index'
 import { detectMimeType } from './mimeUtils'
@@ -78,15 +78,14 @@ export async function getRemoteImage(
         getProvider(ctx, config, specificProvider)
     )
 
-    const data = await taskTime(ctx, 'mixImage', async () => {
+    const data = await taskTime(ctx, 'processImage', async () => {
         const imageBuffer = Buffer.from(buffer)
-        if (config.imageConfusion) {
-            return await mixImage(ctx, imageBuffer, config)
-        }
-        if (config.compress && !metadata.data.urls.regular) {
-            return await qualityImage(ctx, imageBuffer, config)
-        }
-        return imageBuffer
+        return await processImage(
+            ctx,
+            imageBuffer,
+            config,
+            !!metadata.data.urls?.regular
+        )
     })
 
     return {

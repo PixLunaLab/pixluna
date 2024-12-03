@@ -10,7 +10,7 @@ export async function qualityImage(
     let image = sharp(imageBuffer)
 
     const qualifiedImage = await image
-        .png({ quality: config.compressQuality })
+        .png({ quality: config.imageProcessing.compressQuality })
         .toBuffer()
 
     image.destroy()
@@ -24,7 +24,7 @@ export async function mixImage(
     imageBuffer: ArrayBuffer,
     config: Config
 ) {
-    if (config.compress) {
+    if (config.imageProcessing.compress) {
         imageBuffer = await qualityImage(ctx, imageBuffer, config)
     }
 
@@ -67,4 +67,48 @@ export async function mixImage(
     image = undefined
 
     return processedImageBuffer
+}
+
+async function flipImage(
+    image: sharp.Sharp,
+    mode: Config['imageProcessing']['flipMode']
+): Promise<sharp.Sharp> {
+    switch (mode) {
+        case 'horizontal':
+            return image.flop()
+        case 'vertical':
+            return image.flip()
+        case 'both':
+            return image.flip().flop()
+        default:
+            return image
+    }
+}
+
+export async function processImage(
+    ctx: Context,
+    imageBuffer: Buffer,
+    config: Config,
+    hasRegularUrl: boolean
+): Promise<Buffer> {
+    let image = sharp(imageBuffer)
+
+    if (config.imageProcessing.isFlip) {
+        image = await flipImage(image, config.imageProcessing.flipMode)
+    }
+
+    if (config.imageProcessing.confusion) {
+        const result = await mixImage(ctx, await image.toBuffer(), config)
+        image.destroy()
+        return result
+    }
+    if (config.imageProcessing.compress && !hasRegularUrl) {
+        const result = await qualityImage(ctx, await image.toBuffer(), config)
+        image.destroy()
+        return result
+    }
+
+    const result = await image.toBuffer()
+    image.destroy()
+    return result
 }

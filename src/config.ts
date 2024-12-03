@@ -7,11 +7,8 @@ export interface Config {
     isProxy: boolean
     proxyHost: string
     baseUrl: string
-    imageConfusion: boolean
     maxConcurrency: number
     forwardMessage: boolean
-    compress: boolean
-    compressQuality: number
     defaultSourceProvider: string[]
     isLog: boolean
     pixiv: {
@@ -44,6 +41,13 @@ export interface Config {
     yande?: {
         keyPairs: { login: string; password: string }[]
     }
+    imageProcessing: {
+        confusion: boolean
+        compress: boolean
+        compressQuality: number
+        isFlip: boolean
+        flipMode: 'horizontal' | 'vertical' | 'both'
+    }
 }
 
 export const Config: Schema<Config> = Schema.intersect([
@@ -57,10 +61,6 @@ export const Config: Schema<Config> = Schema.intersect([
             .default(false)
             .description('是否排除 AI 生成作品。'),
 
-        imageConfusion: Schema.boolean()
-            .default(false)
-            .description('是否启用图片混淆处理。（对某些平台有奇效）'),
-
         maxConcurrency: Schema.number()
             .default(1)
             .description('最大并发请求数。')
@@ -70,21 +70,42 @@ export const Config: Schema<Config> = Schema.intersect([
 
         forwardMessage: Schema.boolean()
             .default(true)
-            .description('是否以转发消息格式发送图片。'),
-
-        compress: Schema.boolean()
-            .default(false)
-            .description(
-                '是否压缩图片（能大幅度提升发送的速度，但是对图片质量有影响）'
-            ),
-
-        compressQuality: Schema.percent()
-            .default(65)
-            .description('图片压缩质量')
-            .min(1)
-            .max(100)
-            .step(1)
+            .description('是否以转发消息格式发送图片。')
     }).description('通用设置'),
+
+    // 图片处理设置
+    Schema.object({
+        imageProcessing: Schema.object({
+            confusion: Schema.boolean()
+                .default(false)
+                .description('是否启用图片混淆处理。（对某些平台有奇效）'),
+
+            compress: Schema.boolean()
+                .default(false)
+                .description(
+                    '是否压缩图片（能大幅度提升发送的速度，但是对图片质量有影响）'
+                ),
+
+            compressQuality: Schema.percent()
+                .default(65)
+                .description('图片压缩质量')
+                .min(1)
+                .max(100)
+                .step(1),
+
+            isFlip: Schema.boolean()
+                .default(false)
+                .description('是否启用图片翻转处理。'),
+
+            flipMode: Schema.union([
+                Schema.const('horizontal').description('水平翻转'),
+                Schema.const('vertical').description('垂直翻转'),
+                Schema.const('both').description('水平和垂直翻转')
+            ])
+                .default('horizontal')
+                .description('图片翻转模式')
+        }).description('图片处理设置')
+    }),
 
     // R18 内容设置
     Schema.object({
