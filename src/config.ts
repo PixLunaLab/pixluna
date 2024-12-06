@@ -48,6 +48,10 @@ export interface Config {
         isFlip: boolean
         flipMode: 'horizontal' | 'vertical' | 'both'
     }
+    autoRecall: {
+        enable: boolean
+        delay: number
+    }
 }
 
 export const Config: Schema<Config> = Schema.intersect([
@@ -70,7 +74,19 @@ export const Config: Schema<Config> = Schema.intersect([
 
         forwardMessage: Schema.boolean()
             .default(true)
-            .description('是否以转发消息格式发送图片')
+            .description('是否以转发消息格式发送图片'),
+
+        autoRecall: Schema.object({
+            enable: Schema.boolean()
+                .default(true)
+                .description('是否启用自动撤回'),
+            delay: Schema.number()
+                .default(30)
+                .description('自动撤回延迟时间（秒）')
+                .min(1)
+                .max(120)
+                .step(1)
+        })
     }).description('通用设置'),
 
     // 图片处理设置

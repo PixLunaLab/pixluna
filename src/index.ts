@@ -6,6 +6,7 @@ import { render } from './utils/renderer'
 import { getProvider } from './providers'
 import { createAtMessage } from './utils/messageBuilder'
 import { registerCommand } from './command'
+import { setupAutoRecall } from './utils/recall'
 
 export let logger: Logger
 
@@ -70,9 +71,9 @@ export function apply(ctx: Context, config: Config) {
 
             await pool.run()
 
-            let id: string[]
+            let messageIds: string[] = []
             try {
-                id = await taskTime(ctx, 'send message', () => {
+                const ids = await taskTime(ctx, 'send message', () => {
                     const combinedMessage = h('message', messages)
                     if (config.forwardMessage) {
                         return session.send(
@@ -85,15 +86,30 @@ export function apply(ctx: Context, config: Config) {
                     }
                     return session.send(combinedMessage)
                 })
+                messageIds = Array.isArray(ids) ? ids : [ids]
             } catch (e) {
                 logger.error('发送消息时发生错误', { error: e })
+                const errorMessageId = await session.send(
+                    createAtMessage(
+                        session.userId,
+                        '消息发送失败了喵，账号可能被风控\n'
+                    )
+                )
+                if (errorMessageId) {
+                    messageIds = messageIds.concat(
+                        Array.isArray(errorMessageId)
+                            ? errorMessageId
+                            : [errorMessageId]
+                    )
+                }
             }
 
-            if (id === undefined || id.length === 0) {
-                logger.error('消息发送失败', { reason: '账号可能被风控' })
-                return createAtMessage(
-                    session.userId,
-                    '消息发送失败了喵，账号可能被风控\n'
+            if (messageIds.length > 0 && config.autoRecall.enable) {
+                await setupAutoRecall(
+                    ctx,
+                    session,
+                    messageIds,
+                    config.autoRecall.delay * 1000
                 )
             }
         })
