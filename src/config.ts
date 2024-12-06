@@ -78,7 +78,7 @@ export const Config: Schema<Config> = Schema.intersect([
 
         autoRecall: Schema.object({
             enable: Schema.boolean()
-                .default(true)
+                .default(false)
                 .description('是否启用自动撤回'),
             delay: Schema.number()
                 .default(30)
