@@ -96,7 +96,7 @@ export class KonachanSourceProvider extends SourceProvider {
             }
 
             const post = res[0]
-            const url = this.config.compress ? post.sample_url : post.file_url
+            const url = this.config.imageProcessing.compress ? post.sample_url : post.file_url
 
             const generalImageData: GeneralImageData = {
                 id: post.id,

@@ -78,7 +78,7 @@ export class DanbooruSourceProvider extends SourceProvider {
             }
 
             const post = res[0]
-            const url = this.config.compress
+            const url = this.config.imageProcessing.compress
                 ? post.large_file_url
                 : post.file_url
 

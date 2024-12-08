@@ -84,7 +84,7 @@ export abstract class LoliconLikeProvider extends SourceProvider {
         }
 
         const imageData = res.data[0]
-        const url = this.config.compress
+        const url = this.config.imageProcessing.compress
             ? imageData.urls.original
             : imageData.urls.regular || imageData.urls.original
 

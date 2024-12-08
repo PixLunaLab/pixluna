@@ -80,7 +80,7 @@ export class SafebooruSourceProvider extends SourceProvider {
             return {
                 status: 'success',
                 data: {
-                    url: this.config.compress ? sampleUrl : originalUrl,
+                    url: this.config.imageProcessing.compress ? sampleUrl : originalUrl,
                     urls: {
                         regular: sampleUrl,
                         original: originalUrl
