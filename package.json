@@ -2,12 +2,22 @@
     "name": "koishi-plugin-pixluna",
     "description": "比较新的涩图插件（？",
     "version": "2.3.1-beta.3",
-    "main": "lib/index.js",
+    "main": "lib/index.cjs",
+    "module": "lib/index.mjs",
+    "types": "lib/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./lib/index.d.ts",
+            "require": "./lib/index.cjs",
+            "import": "./lib/index.mjs"
+        }
+    },
     "files": [
         "lib"
     ],
     "scripts": {
-        "build": "node esbuild.config.mjs",
+        "dev": "node esbuild.config.mjs",
+        "build": "node esbuild.config.mjs && tsc --emitDeclarationOnly && rollup -c rollup.config.mjs",
         "lint": "eslint src",
         "lint-fix": "eslint src --fix"
     },
@@ -31,6 +41,7 @@
     },
     "devDependencies": {
         "@koishijs/plugin-proxy-agent": "^0.3.3",
+        "@rollup/plugin-multi-entry": "^6.0.1",
         "@typescript-eslint/eslint-plugin": "^7.18.0",
         "@typescript-eslint/parser": "^8.6.0",
         "esbuild": "^0.23.1",
@@ -43,6 +54,9 @@
         "eslint-plugin-prettier": "^5.2.1",
         "eslint-plugin-promise": "^7.1.0",
         "prettier": "^3.3.3",
+        "rollup": "^4.28.1",
+        "rollup-plugin-delete": "^2.1.0",
+        "rollup-plugin-dts": "^6.1.1",
         "sharp": "^0.33.5"
     },
     "dependencies": {

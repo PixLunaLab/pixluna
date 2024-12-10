@@ -1,12 +1,26 @@
 import esbuild from 'esbuild'
 
-const options = {
+const baseOptions = {
     entryPoints: ['./src/index.ts'],
     bundle: true,
-    outdir: 'lib',
     minify: true,
     platform: 'node',
     packages: 'external',
 }
 
-await esbuild.build(options)
+const cjsOptions = {
+    ...baseOptions,
+    outfile: 'lib/index.cjs',
+    format: 'cjs',
+}
+
+const esmOptions = {
+    ...baseOptions,
+    outfile: 'lib/index.mjs',
+    format: 'esm',
+}
+
+await Promise.all([
+    esbuild.build(cjsOptions),
+    esbuild.build(esmOptions),
+])
