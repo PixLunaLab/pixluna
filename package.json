@@ -38,8 +38,7 @@
     ],
     "peerDependencies": {
         "@koishijs/plugin-proxy-agent": "^0.3.3",
-        "koishi": "^4.17.0",
-        "sharp": "^0.33.5"
+        "koishi": "^4.17.0"
     },
     "devDependencies": {
         "@koishijs/plugin-proxy-agent": "^0.3.3",
@@ -58,11 +57,11 @@
         "prettier": "^3.3.3",
         "rollup": "^4.28.1",
         "rollup-plugin-delete": "^2.1.0",
-        "rollup-plugin-dts": "^6.1.1",
-        "sharp": "^0.33.5"
+        "rollup-plugin-dts": "^6.1.1"
     },
     "dependencies": {
-        "@satorijs/element": "^3.1.7"
+        "@satorijs/element": "^3.1.7",
+        "sharp": "^0.33.5"
     },
     "koishi": {
         "description": {
