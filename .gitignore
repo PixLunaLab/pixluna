@@ -29,4 +29,4 @@ yarn.lock
 package-lock.json
 .pnp.js
 
-kumoya/*
+kumoya
