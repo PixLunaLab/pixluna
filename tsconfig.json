@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "lib",
-    "target": "es2022",
+    "target": "esnext",
     "module": "esnext",
     "declaration": true,
     "emitDeclarationOnly": true,

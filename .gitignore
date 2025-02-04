@@ -28,3 +28,5 @@ tsconfig.tsbuildinfo
 yarn.lock
 package-lock.json
 .pnp.js
+
+kumoya/*
