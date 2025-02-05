@@ -4,7 +4,7 @@ import type Config from '../config'
 
 export async function qualityImage(
     _ctx: Context,
-    imageBuffer: ArrayBuffer,
+    imageBuffer: Buffer,
     config: Config
 ) {
     let image = sharp(imageBuffer)
@@ -21,7 +21,7 @@ export async function qualityImage(
 
 export async function mixImage(
     ctx: Context,
-    imageBuffer: ArrayBuffer,
+    imageBuffer: Buffer,
     config: Config
 ) {
     if (config.imageProcessing.compress) {
