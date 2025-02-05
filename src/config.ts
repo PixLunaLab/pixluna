@@ -52,6 +52,7 @@ export interface Config {
         enable: boolean
         delay: number
     }
+    messageBefore: string
 }
 
 export const Config: Schema<Config> = Schema.intersect([
@@ -60,6 +61,10 @@ export const Config: Schema<Config> = Schema.intersect([
         isR18: Schema.boolean()
             .default(false)
             .description('是否允许返回 R18 内容'),
+
+        messageBefore: Schema.string()
+            .default('不可以涩涩哦~')
+            .description('触发响应时的消息，留空则不发送'),
 
         excludeAI: Schema.boolean()
             .default(false)
