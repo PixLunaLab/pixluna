@@ -19,8 +19,8 @@
     ],
     "scripts": {
         "dev": "node esbuild.config.mjs",
-        "build": "kumoya build",
-        "publish": "kumoya publish",
+        "build": "node esbuild.config.mjs && tsc --emitDeclarationOnly && rollup -c rollup.config.mjs",
+        "publish": "yarn npm publish",
         "lint": "eslint src",
         "lint-fix": "eslint src --fix"
     },
@@ -46,6 +46,8 @@
         "@rollup/plugin-multi-entry": "^6.0.1",
         "@typescript-eslint/eslint-plugin": "^7.18.0",
         "@typescript-eslint/parser": "^8.6.0",
+        "esbuild": "^0.23.1",
+        "esbuild-register": "^3.6.0",
         "eslint": "^8.57.1",
         "eslint-config-prettier": "^9.1.0",
         "eslint-config-standard": "^17.1.0",
@@ -53,8 +55,10 @@
         "eslint-plugin-n": "^16.6.2",
         "eslint-plugin-prettier": "^5.2.1",
         "eslint-plugin-promise": "^7.1.0",
-        "kumoya": "^1.6.0",
-        "prettier": "^3.3.3"
+        "prettier": "^3.3.3",
+        "rollup": "^4.28.1",
+        "rollup-plugin-delete": "^2.1.0",
+        "rollup-plugin-dts": "^6.1.1"
     },
     "dependencies": {
         "@satorijs/element": "^3.1.7",
