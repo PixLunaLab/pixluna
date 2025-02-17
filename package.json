@@ -18,9 +18,8 @@
         "lib"
     ],
     "scripts": {
-        "dev": "node esbuild.config.mjs",
-        "build": "node esbuild.config.mjs && tsc --emitDeclarationOnly && rollup -c rollup.config.mjs",
-        "publish": "yarn npm publish",
+        "build": "yakumo build",
+        "publish": "yakumo publish",
         "lint": "eslint src",
         "lint-fix": "eslint src --fix"
     },
