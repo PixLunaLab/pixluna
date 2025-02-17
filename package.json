@@ -43,7 +43,6 @@
     },
     "devDependencies": {
         "@koishijs/plugin-proxy-agent": "^0.3.3",
-        "@rollup/plugin-multi-entry": "^6.0.1",
         "@typescript-eslint/eslint-plugin": "^7.18.0",
         "@typescript-eslint/parser": "^8.6.0",
         "eslint": "^8.57.1",
