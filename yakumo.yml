@@ -1,0 +1,25 @@
+- id: ei3d2p
+  name: yakumo
+  config:
+    pipeline:
+      build:
+        - tsc
+        - esbuild
+- id: 4crjg2
+  name: yakumo-esbuild
+- id: 0i9plm
+  name: yakumo-tsc
+- id: wg0rxd
+  name: yakumo/list
+- id: 9dsypj
+  name: yakumo/prepare
+- id: 34k52j
+  name: yakumo/publish
+- id: e9chm2
+  name: yakumo/test
+- id: rbfsux
+  name: yakumo/upgrade
+- id: foaplt
+  name: yakumo/version
+- id: vvu8w5
+  name: yakumo/run
