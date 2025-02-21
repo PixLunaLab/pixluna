@@ -1,4 +1,4 @@
-import { Context, Element } from '@koishijs/core'
+import { Context, Element } from 'koishi'
 import type { Config } from '../config'
 import type {
     CommonSourceRequest,
