@@ -505,7 +505,7 @@ export class PixivGetByIDProvider extends PixivBaseProvider {
                 options.pid,
                 options.page
             )
-            return renderImageMessage(imageData)
+            return renderImageMessage(imageData, this.config)
         } catch (e) {
             this.ctx.logger.error(e)
             const errorMessage = e instanceof Error ? e.message : String(e)

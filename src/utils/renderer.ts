@@ -16,7 +16,7 @@ export async function render(
             return h('message', [h('text', { content: '没有获取到喵\n' })])
         }
 
-        return renderImageMessage(image)
+        return renderImageMessage(image, config)
     } catch (e) {
         ctx.logger.error(e)
 
