@@ -19,7 +19,7 @@
     ],
     "scripts": {
         "build": "yakumo build",
-        "publish": "yakumo publish",
+        "publish": "yarn npm publish",
         "lint": "eslint src",
         "lint-fix": "eslint src --fix"
     },
