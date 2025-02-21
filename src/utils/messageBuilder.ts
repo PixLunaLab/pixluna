@@ -1,17 +1,26 @@
 import { h } from 'koishi'
 import { GeneralImageData } from './type'
+import { Config } from '../config'
 
 export function renderImageMessage(
-    image: GeneralImageData & { data: Buffer; mimeType: string }
+    image: GeneralImageData & { data: Buffer; mimeType: string },
+    config?: Config
 ): h {
-    return h('', [
+    const elements = [
         h.image(image.data, image.mimeType),
         h('text', { content: `\ntitle：${image.title}\n` }),
-        h('text', { content: `id：${image.id}\n` }),
-        h('text', {
-            content: `tags：${image.tags.map((item: string) => '#' + item).join(' ')}\n`
-        })
-    ])
+        h('text', { content: `id：${image.id}\n` })
+    ]
+
+    if (config?.showTags !== false) {
+        elements.push(
+            h('text', {
+                content: `tags：${image.tags.map((item: string) => '#' + item).join(' ')}\n`
+            })
+        )
+    }
+
+    return h('', elements)
 }
 
 export function createAtMessage(userId: string, content: string) {

@@ -53,6 +53,7 @@ export interface Config {
         delay: number
     }
     messageBefore: string
+    showTags: boolean
 }
 
 export const Config: Schema<Config> = Schema.intersect([
@@ -65,6 +66,10 @@ export const Config: Schema<Config> = Schema.intersect([
         messageBefore: Schema.string()
             .default('不可以涩涩哦~')
             .description('触发响应时的消息，留空则不发送'),
+
+        showTags: Schema.boolean()
+            .default(true)
+            .description('是否显示图片标签'),
 
         excludeAI: Schema.boolean()
             .default(false)

@@ -101,7 +101,9 @@ export class E621SourceProvider extends SourceProvider {
             }
 
             const post = res.posts[0]
-            const url = this.config.imageProcessing.compress ? post.sample.url : post.file.url
+            const url = this.config.imageProcessing.compress
+                ? post.sample.url
+                : post.file.url
 
             const generalImageData: GeneralImageData = {
                 id: post.id,

@@ -129,7 +129,9 @@ export class SankakuSourceProvider extends SourceProvider {
             return {
                 status: 'success',
                 data: {
-                    url: this.config.imageProcessing.compress ? post.sample_url : post.file_url,
+                    url: this.config.imageProcessing.compress
+                        ? post.sample_url
+                        : post.file_url,
                     urls: {
                         regular: post.sample_url,
                         original: post.file_url

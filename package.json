@@ -53,8 +53,8 @@
         "eslint-plugin-promise": "^7.1.0",
         "prettier": "^3.3.3",
         "yakumo": "^1.0.0-beta.21",
-        "yakumo-esbuild": "^0.3.26",
-        "yakumo-tsc": "^0.3.12"
+        "yakumo-esbuild": "^1.0.0-beta.7",
+        "yakumo-tsc": "^1.0.0-beta.5"
     },
     "dependencies": {
         "@satorijs/element": "^3.1.7",

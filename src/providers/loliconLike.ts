@@ -42,8 +42,8 @@ export interface LoliconLikeResponse {
 }
 
 export abstract class LoliconLikeProvider extends SourceProvider {
-    protected declare ctx: Context
-    protected declare config: Config
+    declare protected ctx: Context
+    declare protected config: Config
     protected abstract RANDOM_IMAGE_URL: string
 
     constructor(ctx: Context, config: Config) {

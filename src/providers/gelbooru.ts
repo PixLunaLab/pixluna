@@ -90,7 +90,9 @@ export class GelbooruSourceProvider extends SourceProvider {
             return {
                 status: 'success',
                 data: {
-                    url: this.config.imageProcessing.compress ? post.file_url : post.sample_url,
+                    url: this.config.imageProcessing.compress
+                        ? post.file_url
+                        : post.sample_url,
                     urls: {
                         regular: post.sample_url,
                         original: post.file_url
