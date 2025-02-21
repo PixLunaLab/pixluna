@@ -3,8 +3,8 @@
     pipeline:
       build:
         - tsc
-        - esbuild
-- name: yakumo-esbuild
+        - rolldown
+- name: yakumo-rolldown
 - name: yakumo-tsc
 - name: yakumo/list
 - name: yakumo/prepare
