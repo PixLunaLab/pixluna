@@ -18,7 +18,7 @@
         "lib"
     ],
     "scripts": {
-        "build": "yakumo build",
+        "build": "yakumo build --minify",
         "publish": "yarn npm publish",
         "lint": "eslint src",
         "lint-fix": "eslint src --fix"
@@ -54,7 +54,7 @@
         "prettier": "^3.3.3",
         "rolldown": "1.0.0-beta.3",
         "yakumo": "^1.0.0-beta.21",
-        "yakumo-rolldown": "^1.1.0-beta.2",
+        "yakumo-rolldown": "^1.1.0-beta.3",
         "yakumo-tsc": "^1.0.0-beta.7"
     },
     "dependencies": {
