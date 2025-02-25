@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "lib",
-    "target": "esnext",
-    "module": "esnext",
+    "outFile": "lib/index.d.ts",
+    "target": "ES2020",
+    "module": "ESNext",
     "declaration": true,
     "emitDeclarationOnly": true,
     "composite": false,
