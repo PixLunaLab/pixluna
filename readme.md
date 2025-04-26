@@ -71,6 +71,10 @@ pixluna -n 5 黑丝
 ```
 即可随机获取5张黑丝的图片，关键词一定要放在最后面
 
+## Wiki
+
+[PixLunaLab/pixluna | DeepWiki](PixLunaLab/pixluna)（英语）
+
 ## 贡献者名单
 
 <a href="https://github.com/PixLunaLab/pixluna/graphs/contributors">
