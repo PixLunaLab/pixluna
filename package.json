@@ -20,8 +20,8 @@
     "scripts": {
         "build": "yakumo build --minify",
         "publish": "yarn npm publish",
-        "lint": "eslint src",
-        "lint-fix": "eslint src --fix"
+        "lint": "biome check && biome lint",
+        "lint-fix": "biome format --write && biome lint --write"
     },
     "license": "MPL-2.0",
     "homepage": "https://github.com/PixLunaLab/pixluna",
@@ -41,25 +41,16 @@
         "koishi": "^4.17.0"
     },
     "devDependencies": {
+        "@biomejs/biome": "^2.1.1",
         "@koishijs/plugin-proxy-agent": "^0.3.3",
-        "@typescript-eslint/eslint-plugin": "^7.18.0",
-        "@typescript-eslint/parser": "^8.6.0",
-        "eslint": "^8.57.1",
-        "eslint-config-prettier": "^9.1.0",
-        "eslint-config-standard": "^17.1.0",
-        "eslint-plugin-import": "^2.30.0",
-        "eslint-plugin-n": "^16.6.2",
-        "eslint-plugin-prettier": "^5.2.1",
-        "eslint-plugin-promise": "^7.1.0",
-        "prettier": "^3.3.3",
-        "rolldown": "1.0.0-beta.4",
+        "rolldown": "1.0.0-beta.24",
         "yakumo": "^2.0.0-alpha.2",
-        "yakumo-rolldown": "^1.1.0-beta.3",
+        "yakumo-rolldown": "^1.1.7",
         "yakumo-tsc": "^2.0.0-alpha.2"
     },
     "dependencies": {
-        "@satorijs/element": "^3.1.7",
-        "sharp": "^0.33.5"
+        "@satorijs/element": "^3.1.8",
+        "sharp": "^0.34.2"
     },
     "koishi": {
         "description": {
