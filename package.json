@@ -1,60 +1,60 @@
 {
-    "name": "koishi-plugin-pixluna",
-    "description": "比较新的涩图插件（？",
-    "version": "2.3.8-beta.1",
-    "main": "lib/index.cjs",
-    "module": "lib/index.mjs",
-    "types": "lib/index.d.ts",
-    "type": "module",
-    "exports": {
-        ".": {
-            "types": "./lib/index.d.ts",
-            "require": "./lib/index.cjs",
-            "import": "./lib/index.mjs"
-        },
-        "./package.json": "./package.json"
+  "name": "koishi-plugin-pixluna",
+  "description": "比较新的涩图插件（？",
+  "version": "2.3.8-beta.1",
+  "main": "lib/index.cjs",
+  "module": "lib/index.mjs",
+  "types": "lib/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "require": "./lib/index.cjs",
+      "import": "./lib/index.mjs"
     },
-    "files": [
-        "lib"
-    ],
-    "scripts": {
-        "build": "yakumo build --minify",
-        "publish": "yarn npm publish",
-        "lint": "biome check && biome lint",
-        "lint-fix": "biome format --write && biome lint --write"
-    },
-    "license": "MPL-2.0",
-    "homepage": "https://github.com/PixLunaLab/pixluna",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/PixLunaLab/pixluna"
-    },
-    "keywords": [
-        "pixiv",
-        "koishi",
-        "plugin",
-        "色图",
-        "pixluna"
-    ],
-    "peerDependencies": {
-        "@koishijs/plugin-proxy-agent": "^0.3.3",
-        "koishi": "^4.17.0"
-    },
-    "devDependencies": {
-        "@biomejs/biome": "^2.1.1",
-        "@koishijs/plugin-proxy-agent": "^0.3.3",
-        "rolldown": "1.0.0-beta.24",
-        "yakumo": "^2.0.0-alpha.2",
-        "yakumo-rolldown": "^1.1.7",
-        "yakumo-tsc": "^2.0.0-alpha.2"
-    },
-    "dependencies": {
-        "@satorijs/element": "^3.1.8",
-        "sharp": "^0.34.2"
-    },
-    "koishi": {
-        "description": {
-            "zh": "比较新的涩图插件（？"
-        }
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "yakumo build --minify",
+    "publish": "yarn npm publish",
+    "lint": "biome check && biome lint",
+    "lint-fix": "biome format --write && biome lint --write"
+  },
+  "license": "MPL-2.0",
+  "homepage": "https://github.com/PixLunaLab/pixluna",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PixLunaLab/pixluna"
+  },
+  "keywords": [
+    "pixiv",
+    "koishi",
+    "plugin",
+    "色图",
+    "pixluna"
+  ],
+  "peerDependencies": {
+    "@koishijs/plugin-proxy-agent": "^0.3.3",
+    "koishi": "^4.17.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.1.1",
+    "@koishijs/plugin-proxy-agent": "^0.3.3",
+    "rolldown": "1.0.0-beta.24",
+    "yakumo": "^2.0.0-alpha.2",
+    "yakumo-rolldown": "^1.1.7",
+    "yakumo-tsc": "^2.0.0-alpha.2"
+  },
+  "dependencies": {
+    "@satorijs/element": "^3.1.8",
+    "sharp": "^0.34.2"
+  },
+  "koishi": {
+    "description": {
+      "zh": "比较新的涩图插件（？"
     }
+  }
 }
