@@ -35,7 +35,7 @@ export class DanbooruSourceProvider extends SourceProvider {
   }
 
   private get keyPair() {
-    if (!this.keyPairs.length) return
+    if (!this.keyPairs.length) return null
     return this.keyPairs[Math.floor(Math.random() * this.keyPairs.length)]
   }
 

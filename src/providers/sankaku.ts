@@ -64,7 +64,7 @@ export class SankakuSourceProvider extends SourceProvider {
   }
 
   async getMetaData(
-    { context }: { context: Context },
+    _: { context: Context },
     props: CommonSourceRequest
   ): Promise<SourceResponse<ImageMetaData>> {
     try {
