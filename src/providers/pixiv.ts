@@ -11,7 +11,11 @@ import { SourceProvider } from '../utils/type'
 import { shuffleArray } from '../utils/shuffle'
 import { logger } from '../index'
 import { fetchImageBuffer, USER_AGENT } from '../utils/request'
-import { createAtMessage, renderImageMessage } from '../utils/messageBuilder'
+import {
+  createAtMessage,
+  renderImageMessage,
+  renderMultipleImageMessage
+} from '../utils/messageBuilder'
 
 interface PixivIllustResponse {
   error: boolean
@@ -487,6 +491,43 @@ export class PixivGetByIDProvider extends PixivBaseProvider {
     try {
       const imageData = await this.getImageWithBuffer(options.pid, options.page)
       return renderImageMessage(imageData, this.config)
+    } catch (e) {
+      this.ctx.logger.error(e)
+      const errorMessage = e instanceof Error ? e.message : String(e)
+      return createAtMessage(userId, errorMessage || '获取图片失败')
+    }
+  }
+
+  async getAllImagesWithAtMessage(
+    userId: string,
+    options: { pid: string; page: number }
+  ): Promise<string | Element> {
+    if (!options.pid) {
+      return createAtMessage(userId, '请提供作品 ID (PID)')
+    }
+
+    try {
+      const illustDetail = await this.getIllustDetail(this.ctx, options.pid)
+
+      if (illustDetail.error || !illustDetail.body) {
+        return createAtMessage(userId, '无法获取插画详情')
+      }
+
+      const pageCount = illustDetail.body.pageCount || 1
+
+      if (pageCount === 1) {
+        const imageData = await this.getImageWithBuffer(options.pid, 0)
+        return renderImageMessage(imageData, this.config)
+      }
+
+      const imagePromises = []
+      for (let i = 0; i < pageCount; i++) {
+        imagePromises.push(this.getImageWithBuffer(options.pid, i))
+      }
+
+      const allImages = await Promise.all(imagePromises)
+
+      return renderMultipleImageMessage(allImages, this.config)
     } catch (e) {
       this.ctx.logger.error(e)
       const errorMessage = e instanceof Error ? e.message : String(e)

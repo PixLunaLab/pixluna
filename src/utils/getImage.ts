@@ -6,8 +6,11 @@ export async function getPixivImageByID(
   ctx: Context,
   config: Config,
   userId: string,
-  options: { pid: string; page: number }
+  options: { pid: string; page: number; all?: boolean }
 ) {
   const provider = new PixivGetByIDProvider(ctx, config)
+  if (options.all) {
+    return provider.getAllImagesWithAtMessage(userId, options)
+  }
   return provider.getImageWithAtMessage(userId, options)
 }
