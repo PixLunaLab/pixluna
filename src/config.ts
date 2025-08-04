@@ -129,10 +129,9 @@ export const Config: Schema<Config> = Schema.intersect([
 
   // R18 内容设置
   Schema.object({
-    isR18: Schema.const(true),
     r18P: Schema.percent()
       .default(0.1)
-      .description('R18 内容出现的概率')
+      .description('R18 内容出现的概率（仅当 isR18 为 true 时生效）')
       .min(0)
       .max(1)
       .step(0.01)

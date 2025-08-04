@@ -57,8 +57,18 @@ export class KonachanSourceProvider extends SourceProvider {
   ): Promise<SourceResponse<ImageMetaData>> {
     try {
       const keyPair = this.keyPair
+
+      let tagString = ''
+      if (props.tag) {
+        tagString = props.tag
+          .split(/[,，]/)
+          .map((t) => t.trim())
+          .filter(Boolean)
+          .join(' ')
+      }
+
       const params: Record<string, any> = {
-        tags: `order:random ${props.tag?.replace(/\|/g, ' ') || ''}`.trim(),
+        tags: `order:random ${tagString}`.trim(),
         limit: 1,
         api_version: 2,
         ...(keyPair && {
@@ -68,7 +78,7 @@ export class KonachanSourceProvider extends SourceProvider {
         })
       }
 
-      if (props.r18) {
+      if (this.config.isR18 && props.r18) {
         params.tags =
           `${params.tags} rating:questionable rating:explicit`.trim()
       } else {

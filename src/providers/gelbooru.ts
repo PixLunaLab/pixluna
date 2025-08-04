@@ -37,13 +37,22 @@ export class GelbooruSourceProvider extends SourceProvider {
     { context }: { context: Context },
     props: CommonSourceRequest
   ): Promise<SourceResponse<ImageMetaData>> {
+    let tagString = ''
+    if (props.tag) {
+      tagString = props.tag
+        .split(/[,，]/)
+        .map((t) => t.trim())
+        .filter(Boolean)
+        .join(' ')
+    }
+
     const params = new URLSearchParams({
       page: 'dapi',
       s: 'post',
       q: 'index',
       json: '1',
       limit: '1',
-      tags: `${props.tag || ''} sort:random${props.r18 ? '' : ' rating:safe'}`
+      tags: `${tagString} sort:random${this.config.isR18 && props.r18 ? '' : ' rating:safe'}`
     })
 
     const keyPair = this.keyPair

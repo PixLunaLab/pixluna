@@ -57,12 +57,22 @@ export class LolibooruSourceProvider extends SourceProvider {
   ): Promise<SourceResponse<ImageMetaData>> {
     try {
       const keyPair = this.keyPair
+
+      let tagString = ''
+      if (props.tag) {
+        tagString = props.tag
+          .split(/[,，]/)
+          .map((t) => t.trim())
+          .filter(Boolean)
+          .join(' ')
+      }
+
       const params: Record<string, string> = {
-        tags: `${props.tag ? props.tag.replace(/\|/g, ' ') : ''} order:random`,
+        tags: `${tagString} order:random`,
         limit: '1'
       }
 
-      if (props.r18) {
+      if (this.config.isR18 && props.r18) {
         params.tags += ' -rating:s'
       } else {
         params.tags += ' rating:s'

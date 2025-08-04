@@ -30,13 +30,22 @@ export class SafebooruSourceProvider extends SourceProvider {
     props: CommonSourceRequest
   ): Promise<SourceResponse<ImageMetaData>> {
     try {
+      let tagString = ''
+      if (props.tag) {
+        tagString = props.tag
+          .split(/[,，]/)
+          .map((t) => t.trim())
+          .filter(Boolean)
+          .join(' ')
+      }
+
       const params = {
         page: 'dapi',
         s: 'post',
         q: 'index',
         json: '1',
         limit: '1',
-        tags: `${props.tag ? props.tag.replace(/\|/g, ' ') : ''} sort:random`
+        tags: `${tagString} sort:random`
       }
 
       const url = `${this.endpoint}?${new URLSearchParams(params).toString()}`

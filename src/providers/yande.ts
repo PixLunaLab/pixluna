@@ -57,8 +57,18 @@ export class YandeSourceProvider extends SourceProvider {
   ): Promise<SourceResponse<ImageMetaData>> {
     try {
       const keyPair = this.keyPair
+
+      let tagString = ''
+      if (props.tag) {
+        tagString = props.tag
+          .split(/[,，]/)
+          .map((t) => t.trim())
+          .filter(Boolean)
+          .join(' ')
+      }
+
       const params: Record<string, any> = {
-        tags: `${props.tag?.replace(/\|/g, ' ') || ''} order:random`,
+        tags: `${tagString} order:random`,
         limit: 1,
         ...(keyPair
           ? {
@@ -68,7 +78,7 @@ export class YandeSourceProvider extends SourceProvider {
           : {})
       }
 
-      if (props.r18) {
+      if (this.config.isR18 && props.r18) {
         params.tags += ' rating:explicit'
       } else {
         params.tags += ' rating:safe'

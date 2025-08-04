@@ -71,6 +71,51 @@ interface PixivResponse {
   }
 }
 
+function processTags(tag: string): string[] {
+  if (!tag) return []
+  const tags = tag
+    .split(/[,，]/)
+    .map((t) => t.trim())
+    .filter(Boolean)
+  return tags.slice(0, 5)
+}
+
+function isIllustMatchTags(illust: any, targetTags: string[]): boolean {
+  if (!targetTags.length) return true
+
+  const title = illust.title?.toLowerCase() || ''
+  const tags = Array.isArray(illust.tags)
+    ? illust.tags.map((t: any) =>
+        typeof t === 'string' ? t.toLowerCase() : t.tag?.toLowerCase() || ''
+      )
+    : []
+
+  return targetTags.every((tag) => {
+    const tagLower = tag.toLowerCase()
+    return (
+      title.includes(tagLower) ||
+      tags.some((t: any) => typeof t === 'string' && t.includes(tagLower))
+    )
+  })
+}
+
+function filterIllustsByTags(illusts: any[], tags: string[]): any[] {
+  if (!tags.length || !illusts.length) return illusts
+
+  for (let i = tags.length; i > 0; i--) {
+    const targetTags = tags.slice(0, i)
+    const filtered = illusts.filter((illust) =>
+      isIllustMatchTags(illust, targetTags)
+    )
+
+    if (filtered.length > 0) {
+      return filtered
+    }
+  }
+
+  return illusts
+}
+
 abstract class PixivBaseProvider extends SourceProvider {
   protected getHeaders() {
     return {
@@ -118,7 +163,9 @@ export class PixivDiscoverySourceProvider extends PixivBaseProvider {
     props: CommonSourceRequest
   ): Promise<SourceResponse<ImageMetaData>> {
     try {
-      const url = `${PixivDiscoverySourceProvider.DISCOVERY_URL}?mode=${props.r18 ? 'r18' : 'all'}&limit=8`
+      const tags = processTags(props.tag)
+
+      const url = `${PixivDiscoverySourceProvider.DISCOVERY_URL}?mode=${this.config.isR18 && props.r18 ? 'r18' : 'all'}&limit=20`
       const discoveryRes = await this.fetchPixivData<PixivResponse>(
         context,
         url
@@ -131,7 +178,26 @@ export class PixivDiscoverySourceProvider extends PixivBaseProvider {
         }
       }
 
-      const selectedIllust = shuffleArray(discoveryRes.body.illusts)[0]
+      let filteredIllusts = filterIllustsByTags(discoveryRes.body.illusts, tags)
+
+      if (!this.config.isR18) {
+        filteredIllusts = filteredIllusts.filter(
+          (illust) =>
+            !(
+              illust.xRestrict > 0 ||
+              illust.tags.some((tag: string) => tag.toLowerCase() === 'r-18')
+            )
+        )
+      }
+
+      if (filteredIllusts.length === 0) {
+        return {
+          status: 'error',
+          data: new Error(`未找到包含标签 "${tags.join(', ')}" 的插画`)
+        }
+      }
+
+      const selectedIllust = shuffleArray(filteredIllusts)[0]
 
       const illustPagesUrl =
         PixivDiscoverySourceProvider.ILLUST_PAGES_URL.replace(
@@ -194,11 +260,14 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
 
   static ILLUST_URL = 'https://www.pixiv.net/ajax/illust/{ARTWORK_ID}'
 
-  async getMetaData({
-    context
-  }: {
-    context: Context
-  }): Promise<SourceResponse<ImageMetaData>> {
+  async getMetaData(
+    {
+      context
+    }: {
+      context: Context
+    },
+    props?: CommonSourceRequest
+  ): Promise<SourceResponse<ImageMetaData>> {
     if (!this.config.pixiv.phpSESSID) {
       return {
         status: 'error',
@@ -206,84 +275,172 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
       }
     }
 
+    const tags = processTags(props?.tag)
+
     try {
       const allUsers = await this.getAllFollowingUsers(context)
       if (!allUsers.length) {
         return { status: 'error', data: new Error('未找到关注的用户') }
       }
 
-      const randomUser = shuffleArray(allUsers)[0]
-      const userProfileRes = await this.getUserProfile(
-        context,
-        randomUser.userId
-      )
+      const matchedIllusts: any[] = []
+      const processedUserIds = new Set<string>()
+      let usersChecked = 0
+      const maxUsersToCheck = Math.min(allUsers.length, 10)
 
-      if (userProfileRes.error || !userProfileRes.body.illusts) {
-        return {
-          status: 'error',
-          data: new Error('无法获取用户作品列表')
-        }
-      }
+      const shuffledUsers = shuffleArray(allUsers)
+      while (usersChecked < maxUsersToCheck && matchedIllusts.length < 20) {
+        const currentUser = shuffledUsers[usersChecked]
+        usersChecked++
 
-      const illustIds = Object.keys(userProfileRes.body.illusts)
-      let illustDetail: PixivIllustResponse
-      let attempts = 0
-      const maxAttempts = illustIds.length
+        if (processedUserIds.has(currentUser.userId)) continue
+        processedUserIds.add(currentUser.userId)
 
-      do {
-        const randomIllustId = shuffleArray(illustIds)[0]
-        illustDetail = await this.getIllustDetail(context, randomIllustId)
-        attempts++
+        const userProfileRes = await this.getUserProfile(
+          context,
+          currentUser.userId
+        )
 
-        if (illustDetail.error || !illustDetail.body) {
-          if (attempts >= maxAttempts) {
-            return {
-              status: 'error',
-              data: new Error('无法获取合适的插画详情')
-            }
+        if (userProfileRes.error || !userProfileRes.body.illusts) continue
+
+        const illustsData = Object.entries(userProfileRes.body.illusts).map(
+          ([id, illust]) => ({
+            id,
+            ...illust
+          })
+        )
+
+        if (tags.length > 0) {
+          for (const illust of illustsData) {
+            try {
+              const detail = await this.getIllustDetail(context, illust.id)
+
+              if (!detail.error && detail.body) {
+                const isR18 =
+                  detail.body.xRestrict > 0 ||
+                  detail.body.tags.tags.some(
+                    (tag) => tag.tag.toLowerCase() === 'r-18'
+                  )
+
+                if (
+                  (this.config.isR18 || !isR18) &&
+                  isIllustMatchTags(detail.body, tags)
+                ) {
+                  matchedIllusts.push(detail.body)
+                }
+              }
+            } catch (_error) {}
           }
-          continue
-        }
-
-        const isR18 =
-          illustDetail.body.xRestrict > 0 ||
-          illustDetail.body.tags.tags.some(
-            (tag) => tag.tag.toLowerCase() === 'r-18'
-          )
-
-        if (!this.config.isR18 && isR18) {
-          continue
-        }
-
-        break
-      } while (attempts < maxAttempts)
-
-      if (attempts >= maxAttempts) {
-        return {
-          status: 'error',
-          data: new Error('未找到符合条件的插画')
+        } else {
+          break
         }
       }
 
-      const illustData = illustDetail.body
-      return {
-        status: 'success',
-        data: {
-          url: this.constructImageUrl(illustData.urls.original),
-          urls: {
-            original: this.constructImageUrl(illustData.urls.original)
-          },
-          raw: {
-            id: parseInt(illustData.id),
-            title: illustData.title,
-            author: illustData.userName,
-            r18: illustData.xRestrict > 0,
-            tags: illustData.tags.tags.map((tag) => tag.tag),
-            extension: illustData.urls.original.split('.').pop(),
-            aiType: 0,
-            uploadDate: new Date(illustData.createDate).getTime(),
+      if (tags.length > 0 && matchedIllusts.length > 0) {
+        const selectedIllust = shuffleArray(matchedIllusts)[0]
+        const illustData = selectedIllust
+
+        return {
+          status: 'success',
+          data: {
+            url: this.constructImageUrl(illustData.urls.original),
             urls: {
               original: this.constructImageUrl(illustData.urls.original)
+            },
+            raw: {
+              id: parseInt(illustData.id),
+              title: illustData.title,
+              author: illustData.userName,
+              r18: illustData.xRestrict > 0,
+              tags: illustData.tags.tags.map((tag: { tag: any }) => tag.tag),
+              extension: illustData.urls.original.split('.').pop(),
+              aiType: 0,
+              uploadDate: new Date(illustData.createDate).getTime(),
+              urls: {
+                original: this.constructImageUrl(illustData.urls.original)
+              }
+            }
+          }
+        }
+      } else if (tags.length > 0 && matchedIllusts.length === 0) {
+        return {
+          status: 'error',
+          data: new Error(`未找到包含标签 "${tags.join(', ')}" 的插画`)
+        }
+      } else {
+        const randomUser = shuffleArray(allUsers)[0]
+        const userProfileRes = await this.getUserProfile(
+          context,
+          randomUser.userId
+        )
+
+        if (userProfileRes.error || !userProfileRes.body.illusts) {
+          return {
+            status: 'error',
+            data: new Error('无法获取用户作品列表')
+          }
+        }
+
+        const illustIds = Object.keys(userProfileRes.body.illusts)
+        let illustDetail: PixivIllustResponse
+        let attempts = 0
+        const maxAttempts = illustIds.length
+
+        do {
+          const randomIllustId = shuffleArray(illustIds)[0]
+          illustDetail = await this.getIllustDetail(context, randomIllustId)
+          attempts++
+
+          if (illustDetail.error || !illustDetail.body) {
+            if (attempts >= maxAttempts) {
+              return {
+                status: 'error',
+                data: new Error('无法获取合适的插画详情')
+              }
+            }
+            continue
+          }
+
+          const isR18 =
+            illustDetail.body.xRestrict > 0 ||
+            illustDetail.body.tags.tags.some(
+              (tag) => tag.tag.toLowerCase() === 'r-18'
+            )
+
+          if (!this.config.isR18 && isR18) {
+            continue
+          }
+
+          break
+        } while (attempts < maxAttempts)
+
+        if (attempts >= maxAttempts) {
+          return {
+            status: 'error',
+            data: new Error('未找到符合条件的插画')
+          }
+        }
+
+        const illustData = illustDetail.body
+        return {
+          status: 'success',
+          data: {
+            url: this.constructImageUrl(illustData.urls.original),
+            urls: {
+              original: this.constructImageUrl(illustData.urls.original)
+            },
+            raw: {
+              id: parseInt(illustData.id),
+              title: illustData.title,
+              author: illustData.userName,
+              r18: illustData.xRestrict > 0,
+              tags: illustData.tags.tags.map((tag) => tag.tag),
+              extension: illustData.urls.original.split('.').pop(),
+              aiType: 0,
+              uploadDate: new Date(illustData.createDate).getTime(),
+              urls: {
+                original: this.constructImageUrl(illustData.urls.original)
+              }
             }
           }
         }

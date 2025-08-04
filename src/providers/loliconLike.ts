@@ -65,7 +65,7 @@ export abstract class LoliconLikeProvider extends SourceProvider {
     }
 
     const requestParams: LoliconLikeSourceRequest = {
-      r18: props.r18 ? 1 : 0,
+      r18: this.config.isR18 && props.r18 ? 1 : 0,
       num: 1,
       size: props.size,
       keyword: tags.length === 0 ? props.tag : undefined,

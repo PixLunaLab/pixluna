@@ -75,10 +75,17 @@ export class SankakuSourceProvider extends SourceProvider {
 
       await this.login(keyPair)
 
+      let tagString = ''
+      if (props.tag) {
+        tagString = props.tag
+          .split(/[,，]/)
+          .map((t) => t.trim())
+          .filter(Boolean)
+          .join(' ')
+      }
+
       const params = new URLSearchParams({
-        tags: `${props.tag || ''} order:random${
-          props.r18 ? '' : ' rating:safe'
-        }`,
+        tags: `${tagString} order:random${this.config.isR18 && props.r18 ? '' : ' rating:safe'}`,
         limit: '1'
       })
 
