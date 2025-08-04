@@ -15,13 +15,14 @@ export function apply(ctx: Context, config: Config) {
   setupLogger(config)
 
   ctx
-    .command('pixluna [tag:text]', '来张色图')
+    .command('pixluna', '来张色图')
     .alias('色图')
     .option('number', '-n <value:number>', {
       fallback: 1
     })
     .option('source', '-s <source:string>', { fallback: '' })
-    .action(async ({ session, options }, tag) => {
+    .option('tag', '-t <tags:string>', { fallback: '' })
+    .action(async ({ session, options }) => {
       if (!Number.isInteger(options.number) || options.number <= 0) {
         return createAtMessage(session.userId, '图片数量必须是大于0的整数哦~')
       }
@@ -58,7 +59,12 @@ export function apply(ctx: Context, config: Config) {
       for (let i = 0; i < Math.min(10, options.number); i++) {
         pool.add(
           taskTime(ctx, `${i + 1} image`, async () => {
-            const message = await render(ctx, mergedConfig, tag, options.source)
+            const message = await render(
+              ctx,
+              mergedConfig,
+              options.tag,
+              options.source
+            )
             messages.push(message)
           })
         )

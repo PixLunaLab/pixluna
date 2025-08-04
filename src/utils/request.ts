@@ -60,7 +60,8 @@ export async function getRemoteImage(
     {
       r18: config.isR18 && Math.random() < config.r18P,
       excludeAI: config.excludeAI,
-      tag: tag ? tag.split(' ').join('|') : void 0,
+      // 直接传递标签，不再预处理标签，留给各个提供器处理
+      tag: tag || void 0,
       proxy: config.baseUrl ? config.baseUrl : void 0
     }
   )

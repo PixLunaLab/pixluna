@@ -44,7 +44,7 @@ export interface LoliconLikeResponse {
 export abstract class LoliconLikeProvider extends SourceProvider {
   protected declare ctx: Context
   protected declare config: Config
-  protected abstract RANDOM_IMAGE_URL: string
+  protected abstract API_URL: string
 
   constructor(ctx: Context, config: Config) {
     super(ctx, config)
@@ -56,18 +56,26 @@ export abstract class LoliconLikeProvider extends SourceProvider {
     { context }: { context: Context },
     props: CommonSourceRequest
   ): Promise<SourceResponse<ImageMetaData>> {
+    let tags: string[] = []
+    if (props.tag) {
+      tags = props.tag
+        .split(/[,，]/)
+        .map((t) => t.trim())
+        .filter(Boolean)
+    }
+
     const requestParams: LoliconLikeSourceRequest = {
       r18: props.r18 ? 1 : 0,
       num: 1,
       size: props.size,
-      keyword: props.tag || undefined,
-      tag: props.tag ? [props.tag] : undefined,
+      keyword: tags.length === 0 ? props.tag : undefined,
+      tag: tags.length > 0 ? tags : undefined,
       excludeAI: props.excludeAI,
       proxy: props.proxy
     }
 
     const res = await context.http.post<LoliconLikeResponse>(
-      this.RANDOM_IMAGE_URL,
+      this.API_URL,
       requestParams,
       {
         proxyAgent: this.config.isProxy ? this.config.proxyHost : undefined
@@ -124,13 +132,12 @@ export abstract class LoliconLikeProvider extends SourceProvider {
   }
 }
 
-// export source
 export class LolisukiSourceProvider extends LoliconLikeProvider {
   static description = '通过 Lolisuki API 获取图片'
-  protected RANDOM_IMAGE_URL = 'https://lolisuki.cn/api/setu/v1'
+  protected API_URL = 'https://lolisuki.cn/api/setu/v1'
 }
 
 export class LoliconSourceProvider extends LoliconLikeProvider {
   static description = '通过 Lolicon API 获取图片'
-  protected RANDOM_IMAGE_URL = 'https://api.lolicon.app/setu/v2'
+  protected API_URL = 'https://api.lolicon.app/setu/v2'
 }
