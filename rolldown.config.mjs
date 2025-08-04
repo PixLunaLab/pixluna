@@ -11,7 +11,7 @@ export default defineConfig([
       inlineDynamicImports: true
     },
     platform: 'node',
-    external: [/node_modules/]
+    external: [/^[^./]/]
   },
   {
     input: 'src/index.ts',
@@ -22,7 +22,7 @@ export default defineConfig([
       inlineDynamicImports: true
     },
     platform: 'node',
-    external: [/node_modules/]
+    external: [/^[^./]/]
   },
   {
     input: 'src/index.ts',
@@ -33,6 +33,6 @@ export default defineConfig([
     },
     plugins: [dts({ emitDtsOnly: true })],
     platform: 'node',
-    external: [/node_modules/]
+    external: [/^[^./]/]
   }
 ])
