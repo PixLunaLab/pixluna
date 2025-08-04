@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-pixluna",
   "description": "比较新的涩图插件（？",
-  "version": "2.3.9-beta.2",
+  "version": "2.3.9-beta.3",
   "main": "lib/index.cjs",
   "module": "lib/index.mjs",
   "types": "lib/index.d.ts",
@@ -18,7 +18,7 @@
     "lib"
   ],
   "scripts": {
-    "build": "rolldown -c rolldown.config.mjs",
+    "build": "yakumo build --minify",
     "publish": "yarn npm publish",
     "lint": "biome check && biome lint",
     "lint-fix": "biome format --write && biome lint --write"
@@ -43,8 +43,9 @@
   "devDependencies": {
     "@biomejs/biome": "^2.1.1",
     "@koishijs/plugin-proxy-agent": "^0.3.3",
-    "rolldown": "1.0.0-beta.30",
-    "rolldown-plugin-dts": "^0.15.0"
+    "yakumo": "^2.0.0-alpha.6",
+    "yakumo-rolldown": "^1.1.10",
+    "yakumo-tsc": "^2.0.0-alpha.3"
   },
   "dependencies": {
     "@satorijs/element": "^3.1.8",

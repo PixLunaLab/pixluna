@@ -1,0 +1,15 @@
+- name: yakumo
+  config:
+    pipeline:
+      build:
+        - tsc
+        - rolldown
+- name: yakumo-rolldown
+- name: yakumo-tsc
+- name: yakumo/list
+- name: yakumo/prepare
+- name: yakumo/publish
+- name: yakumo/test
+- name: yakumo/upgrade
+- name: yakumo/version
+- name: yakumo/run

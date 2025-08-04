@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "lib",
+    "outFile": "lib/index.d.ts",
     "target": "ES2022",
     "module": "ESNext",
     "declaration": true,
+    "emitDeclarationOnly": true,
     "composite": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
