@@ -17,6 +17,17 @@ import {
   renderMultipleImageMessage
 } from '../utils/messageBuilder'
 
+const API_DELAY_MS = 2000
+
+async function addDelay(
+  iteration: number = 0,
+  skipFirst: boolean = true
+): Promise<void> {
+  if (!skipFirst || iteration > 0) {
+    await new Promise((resolve) => setTimeout(resolve, API_DELAY_MS))
+  }
+}
+
 interface PixivIllustResponse {
   error: boolean
   body: {
@@ -290,6 +301,8 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
 
       const shuffledUsers = shuffleArray(allUsers)
       while (usersChecked < maxUsersToCheck && matchedIllusts.length < 20) {
+        await addDelay(usersChecked)
+
         const currentUser = shuffledUsers[usersChecked]
         usersChecked++
 
@@ -313,6 +326,7 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
         if (tags.length > 0) {
           for (const illust of illustsData) {
             try {
+              await addDelay(0, false)
               const detail = await this.getIllustDetail(context, illust.id)
 
               if (!detail.error && detail.body) {
@@ -387,6 +401,8 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
         const maxAttempts = illustIds.length
 
         do {
+          await addDelay(attempts)
+
           const randomIllustId = shuffleArray(illustIds)[0]
           illustDetail = await this.getIllustDetail(context, randomIllustId)
           attempts++
@@ -457,6 +473,8 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
     const allUsers = []
 
     while (true) {
+      await addDelay(offset)
+
       const url = PixivFollowingSourceProvider.FOLLOWING_URL.replace(
         '{USER_ID}',
         this.config.pixiv.userId
@@ -677,12 +695,13 @@ export class PixivGetByIDProvider extends PixivBaseProvider {
         return renderImageMessage(imageData, this.config)
       }
 
-      const imagePromises = []
+      const allImages = []
       for (let i = 0; i < pageCount; i++) {
-        imagePromises.push(this.getImageWithBuffer(options.pid, i))
-      }
+        await addDelay(i)
 
-      const allImages = await Promise.all(imagePromises)
+        const image = await this.getImageWithBuffer(options.pid, i)
+        allImages.push(image)
+      }
 
       return renderMultipleImageMessage(allImages, this.config)
     } catch (e) {

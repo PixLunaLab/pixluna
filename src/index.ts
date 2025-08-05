@@ -10,6 +10,23 @@ import { setupAutoRecall } from './utils/recall'
 
 export let logger: Logger
 
+// 统一管理API请求和循环的延迟时间（毫秒）
+const API_DELAY_MS = 2000
+
+/**
+ * 添加延迟，只在skipFirst为false或循环索引大于0时添加延迟
+ * @param iteration 当前迭代索引，第一次迭代为0
+ * @param skipFirst 是否跳过第一次延迟，默认为true
+ */
+async function addDelay(
+  iteration: number = 0,
+  skipFirst: boolean = true
+): Promise<void> {
+  if (!skipFirst || iteration > 0) {
+    await new Promise((resolve) => setTimeout(resolve, API_DELAY_MS))
+  }
+}
+
 export function apply(ctx: Context, config: Config) {
   logger = createLogger(ctx)
   setupLogger(config)
@@ -57,6 +74,9 @@ export function apply(ctx: Context, config: Config) {
       const pool = new ParallelPool<void>(config.maxConcurrency)
 
       for (let i = 0; i < Math.min(10, options.number); i++) {
+        // 添加延迟，除了第一次迭代
+        await addDelay(i)
+
         pool.add(
           taskTime(ctx, `${i + 1} image`, async () => {
             const message = await render(
