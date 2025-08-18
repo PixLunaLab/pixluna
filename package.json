@@ -41,7 +41,7 @@
     "koishi": "^4.17.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.1.1",
+    "@biomejs/biome": "^2.2.0",
     "@koishijs/plugin-proxy-agent": "^0.3.3",
     "yakumo": "^2.0.0-alpha.6",
     "yakumo-rolldown": "^1.1.10",

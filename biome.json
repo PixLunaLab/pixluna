@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.1.1/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
   "root": true,
   "vcs": {
     "enabled": true,
@@ -41,7 +41,8 @@
         "noExplicitAny": "off",
         "noPrototypeBuiltins": "off",
         "noRedeclare": "off",
-        "noVar": "warn"
+        "noVar": "warn",
+        "noUnknownAtRules": "off"
       },
       "correctness": {
         "noUnusedImports": "on"
