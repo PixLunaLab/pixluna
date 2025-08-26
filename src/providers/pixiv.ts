@@ -231,7 +231,7 @@ export class PixivDiscoverySourceProvider extends PixivBaseProvider {
       )
 
       const generalImageData: GeneralImageData = {
-        id: parseInt(selectedIllust.id),
+        id: parseInt(selectedIllust.id, 10),
         title: selectedIllust.title,
         author: selectedIllust.userName,
         r18: selectedIllust.xRestrict > 0,
@@ -362,7 +362,7 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
               original: this.constructImageUrl(illustData.urls.original)
             },
             raw: {
-              id: parseInt(illustData.id),
+              id: parseInt(illustData.id, 10),
               title: illustData.title,
               author: illustData.userName,
               r18: illustData.xRestrict > 0,
@@ -446,7 +446,7 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
               original: this.constructImageUrl(illustData.urls.original)
             },
             raw: {
-              id: parseInt(illustData.id),
+              id: parseInt(illustData.id, 10),
               title: illustData.title,
               author: illustData.userName,
               r18: illustData.xRestrict > 0,
@@ -567,7 +567,7 @@ export class PixivGetByIDProvider extends PixivBaseProvider {
       }
 
       const generalImageData: GeneralImageData = {
-        id: parseInt(illustData.id),
+        id: parseInt(illustData.id, 10),
         title: illustData.title,
         author: illustData.userName,
         r18: illustData.xRestrict > 0,
