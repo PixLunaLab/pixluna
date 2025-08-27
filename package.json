@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-pixluna",
   "description": "比较新的涩图插件（？",
-  "version": "2.3.9-beta.7",
+  "version": "2.3.10-beta.1",
   "main": "lib/index.cjs",
   "module": "lib/index.mjs",
   "types": "lib/index.d.ts",
@@ -43,6 +43,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.2.0",
     "@koishijs/plugin-proxy-agent": "^0.3.3",
+    "@oxc-project/runtime": "^0.82.3",
     "yakumo": "^2.0.0-alpha.6",
     "yakumo-rolldown": "^1.1.10",
     "yakumo-tsc": "^2.0.0-alpha.3"
