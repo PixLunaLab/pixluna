@@ -52,8 +52,13 @@ export async function mixImage(
       ? dataArray[idx + 2] + 1
       : dataArray[idx + 2] - 1
 
-  const buffer = Buffer.from(dataArray.buffer)
-  using newImage = vips.Image.newFromBuffer(buffer)
+  using newImage = vips.Image.newFromMemory(
+    dataArray,
+    width,
+    height,
+    bands,
+    'uchar' as any
+  )
 
   const processedImageBuffer = newImage.writeToBuffer('.png')
 
