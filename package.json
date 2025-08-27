@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "@satorijs/element": "^3.1.8",
-    "jimp": "^1.6.0"
+    "wasm-vips": "^0.0.14"
   },
   "koishi": {
     "description": {
