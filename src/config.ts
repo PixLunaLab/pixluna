@@ -54,6 +54,7 @@ export interface Config {
   }
   messageBefore: string
   showTags: boolean
+  apiDelay: number
 }
 
 export const Config: Schema<Config> = Schema.intersect([
@@ -90,7 +91,13 @@ export const Config: Schema<Config> = Schema.intersect([
         .min(1)
         .max(120)
         .step(1)
-    })
+    }),
+    apiDelay: Schema.number()
+      .default(2000)
+      .description('API请求和循环的延迟时间（毫秒）')
+      .min(0)
+      .max(10000)
+      .step(100)
   }).description('通用设置'),
 
   // 图片处理设置
