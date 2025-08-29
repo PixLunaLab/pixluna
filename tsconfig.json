@@ -1,20 +1,17 @@
 {
   "compilerOptions": {
     "rootDir": "src",
-    "outFile": "lib/index.d.ts",
+    "outDir": "lib",
     "target": "ES2022",
     "module": "ESNext",
     "declaration": true,
-    "emitDeclarationOnly": true,
+    "emitDeclarationOnly": false,
     "composite": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "moduleResolution": "bundler",
-    "jsx": "react-jsx",
-    "jsxImportSource": "@satorijs/element",
     "types": [
-      "node",
-      "yml-register/types"
+      "node"
     ]
   },
   "include": [
