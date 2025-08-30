@@ -1,5 +1,5 @@
 import type { Context, Element } from 'koishi'
-import type { Config } from '../config'
+import Config from '../config'
 import type {
   CommonSourceRequest,
   GeneralImageData,
@@ -17,14 +17,16 @@ import {
   renderMultipleImageMessage
 } from '../utils/messageBuilder'
 
-const API_DELAY_MS = 2000
+function getApiDelay(config: Config): number {
+  return config.apiDelay
+}
 
 async function addDelay(
   iteration: number = 0,
   skipFirst: boolean = true
 ): Promise<void> {
   if (!skipFirst || iteration > 0) {
-    await new Promise((resolve) => setTimeout(resolve, API_DELAY_MS))
+    await new Promise((resolve) => setTimeout(resolve, getApiDelay(this.config)))
   }
 }
 
