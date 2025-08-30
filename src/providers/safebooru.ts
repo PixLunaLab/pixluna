@@ -9,6 +9,7 @@ import {
   type SourceResponse
 } from '../utils/type'
 import { logger } from '../index'
+import { Provider } from '../utils/providerRegistry'
 
 interface SafebooruPost {
   id: number
@@ -21,6 +22,7 @@ interface SafebooruPost {
   created_at: string
 }
 
+@Provider('safebooru')
 export class SafebooruSourceProvider extends SourceProvider {
   static description = '通过 Safebooru API 获取图片'
   protected endpoint = 'https://safebooru.org/index.php'

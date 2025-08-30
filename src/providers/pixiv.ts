@@ -1,5 +1,5 @@
 import type { Context, Element } from 'koishi'
-import Config from '../config'
+import type Config from '../config'
 import type {
   CommonSourceRequest,
   GeneralImageData,
@@ -16,6 +16,7 @@ import {
   renderImageMessage,
   renderMultipleImageMessage
 } from '../utils/messageBuilder'
+import { Provider } from '../utils/providerRegistry'
 
 function getApiDelay(config: Config): number {
   return config.apiDelay
@@ -26,7 +27,9 @@ async function addDelay(
   skipFirst: boolean = true
 ): Promise<void> {
   if (!skipFirst || iteration > 0) {
-    await new Promise((resolve) => setTimeout(resolve, getApiDelay(this.config)))
+    await new Promise((resolve) =>
+      setTimeout(resolve, getApiDelay(this.config))
+    )
   }
 }
 
@@ -166,6 +169,7 @@ abstract class PixivBaseProvider extends SourceProvider {
 }
 
 // Discovery
+@Provider('pdiscovery')
 export class PixivDiscoverySourceProvider extends PixivBaseProvider {
   static DISCOVERY_URL = 'https://www.pixiv.net/ajax/illust/discovery'
   static ILLUST_PAGES_URL =
@@ -263,6 +267,7 @@ export class PixivDiscoverySourceProvider extends PixivBaseProvider {
 }
 
 // Following
+@Provider('pfollowing')
 export class PixivFollowingSourceProvider extends PixivBaseProvider {
   static description = '获取 Pixiv 已关注画师作品，需要 Pixiv 账号'
   static FOLLOWING_URL =

@@ -10,6 +10,7 @@ import {
   type SourceResponse
 } from '../utils/type'
 import { logger } from '../index'
+import { Provider } from '../utils/providerRegistry'
 
 interface LolibooruPost {
   id: number
@@ -30,6 +31,7 @@ function hashPassword(password: string) {
   return hash.digest('hex')
 }
 
+@Provider('lolibooru')
 export class LolibooruSourceProvider extends SourceProvider {
   static description = '通过 Lolibooru API 获取图片'
   protected endpoint = 'https://lolibooru.moe'

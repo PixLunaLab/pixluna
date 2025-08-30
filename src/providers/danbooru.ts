@@ -9,6 +9,7 @@ import {
   type SourceResponse
 } from '../utils/type'
 import { logger } from '../index'
+import { Provider } from '../utils/providerRegistry'
 
 interface DanbooruPost {
   id: number
@@ -22,6 +23,7 @@ interface DanbooruPost {
   rating: string
 }
 
+@Provider('danbooru')
 export class DanbooruSourceProvider extends SourceProvider {
   static description = '通过 Danbooru API 获取图片'
   protected endpoint = 'https://danbooru.donmai.us'

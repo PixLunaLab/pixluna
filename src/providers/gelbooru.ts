@@ -9,6 +9,7 @@ import type {
 } from '../utils/type'
 import { SourceProvider } from '../utils/type'
 import { logger } from '../index'
+import { Provider } from '../utils/providerRegistry'
 
 interface GelbooruResponse {
   post?: {
@@ -24,6 +25,7 @@ interface GelbooruResponse {
   }[]
 }
 
+@Provider('gelbooru')
 export class GelbooruSourceProvider extends SourceProvider {
   static description = '通过 Gelbooru API 获取图片'
   protected endpoint = 'https://gelbooru.com/index.php'

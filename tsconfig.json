@@ -12,7 +12,8 @@
     "moduleResolution": "bundler",
     "types": [
       "node"
-    ]
+    ],
+    "experimentalDecorators": true
   },
   "include": [
     "src"

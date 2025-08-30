@@ -10,6 +10,7 @@ import {
 } from '../utils/type'
 import { logger } from '../index'
 import { createHash } from 'node:crypto'
+import { Provider } from '../utils/providerRegistry'
 
 interface KonachanPost {
   id: number
@@ -23,6 +24,7 @@ interface KonachanPost {
   rating: string
 }
 
+@Provider('konachan')
 export class KonachanSourceProvider extends SourceProvider {
   static description = '通过 Konachan API 获取图片'
   protected endpoint = 'https://konachan.com'

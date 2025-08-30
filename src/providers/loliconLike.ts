@@ -9,6 +9,7 @@ import type {
 } from '../utils/type'
 import { SourceProvider } from '../utils/type'
 import { logger } from '../index'
+import { Provider } from '../utils/providerRegistry'
 
 export interface LoliconLikeSourceRequest {
   r18?: number
@@ -132,11 +133,13 @@ export abstract class LoliconLikeProvider extends SourceProvider {
   }
 }
 
+@Provider('lolisuki')
 export class LolisukiSourceProvider extends LoliconLikeProvider {
   static description = '通过 Lolisuki API 获取图片'
   protected API_URL = 'https://lolisuki.cn/api/setu/v1'
 }
 
+@Provider('lolicon')
 export class LoliconSourceProvider extends LoliconLikeProvider {
   static description = '通过 Lolicon API 获取图片'
   protected API_URL = 'https://api.lolicon.app/setu/v2'
