@@ -67,7 +67,6 @@ export function apply(ctx: Context, config: Config) {
       const pool = new ParallelPool<void>(config.maxConcurrency)
 
       for (let i = 0; i < Math.min(10, options.number); i++) {
-        // 添加延迟，除了第一次迭代
         await addDelay(mergedConfig, i)
 
         pool.add(

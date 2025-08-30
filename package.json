@@ -41,7 +41,7 @@
     "koishi": "^4.17.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.2.0",
+    "@biomejs/biome": "^2.2.2",
     "@koishijs/plugin-proxy-agent": "^0.3.3",
     "@types/node": "^24.3.0",
     "koishi": "^4.18.9",
