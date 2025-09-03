@@ -18,18 +18,13 @@ import {
 } from '../utils/messageBuilder'
 import { Provider } from '../utils/providerRegistry'
 
-function getApiDelay(config: Config): number {
-  return config.apiDelay
-}
-
 async function addDelay(
+  config: Config,
   iteration: number = 0,
   skipFirst: boolean = true
 ): Promise<void> {
   if (!skipFirst || iteration > 0) {
-    await new Promise((resolve) =>
-      setTimeout(resolve, getApiDelay(this.config))
-    )
+    await new Promise((resolve) => setTimeout(resolve, config.apiDelay))
   }
 }
 
@@ -308,7 +303,7 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
 
       const shuffledUsers = shuffleArray(allUsers)
       while (usersChecked < maxUsersToCheck && matchedIllusts.length < 20) {
-        await addDelay(usersChecked)
+        await addDelay({ ...this.config }, usersChecked)
 
         const currentUser = shuffledUsers[usersChecked]
         usersChecked++
@@ -333,7 +328,7 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
         if (tags.length > 0) {
           for (const illust of illustsData) {
             try {
-              await addDelay(0, false)
+              await addDelay(this.config, 0, false)
               const detail = await this.getIllustDetail(context, illust.id)
 
               if (!detail.error && detail.body) {
@@ -408,7 +403,7 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
         const maxAttempts = illustIds.length
 
         do {
-          await addDelay(attempts)
+          await addDelay(this.config, attempts)
 
           const randomIllustId = shuffleArray(illustIds)[0]
           illustDetail = await this.getIllustDetail(context, randomIllustId)
@@ -480,7 +475,7 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
     const allUsers = []
 
     while (true) {
-      await addDelay(offset)
+      await addDelay(this.config, offset)
 
       const url = PixivFollowingSourceProvider.FOLLOWING_URL.replace(
         '{USER_ID}',
@@ -704,7 +699,7 @@ export class PixivGetByIDProvider extends PixivBaseProvider {
 
       const allImages = []
       for (let i = 0; i < pageCount; i++) {
-        await addDelay(i)
+        await addDelay(this.config, i)
 
         const image = await this.getImageWithBuffer(options.pid, i)
         allImages.push(image)
