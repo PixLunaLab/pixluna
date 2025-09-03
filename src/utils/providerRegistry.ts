@@ -29,11 +29,8 @@ export function registerProvider(
     if (!alias) continue
     const existing = reg.get(alias)
     if (existing) {
-      if (existing === ctor) continue
-      try {
-      } catch {}
+      reg.set(alias, ctor)
     }
-    reg.set(alias, ctor)
   }
 }
 
