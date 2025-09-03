@@ -93,7 +93,7 @@ export const Config: Schema<Config> = Schema.intersect([
         .step(1)
     }),
     apiDelay: Schema.number()
-      .default(2000)
+      .default(1600)
       .description('API请求和循环的延迟时间（毫秒）')
       .min(0)
       .max(10000)
