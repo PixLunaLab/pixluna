@@ -27,8 +27,11 @@ export function registerProvider(
   for (const raw of list) {
     const alias = String(raw).trim()
     if (!alias) continue
-    if (reg.has(alias)) {
-      throw new Error(`Provider alias already registered: ${alias}`)
+    const existing = reg.get(alias)
+    if (existing) {
+      if (existing === ctor) continue
+      try {
+      } catch {}
     }
     reg.set(alias, ctor)
   }
