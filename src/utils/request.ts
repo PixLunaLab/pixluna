@@ -32,7 +32,7 @@ export async function fetchImageBuffer(
       headers
     })
 
-    const mimeType = detectMimeType(response)
+    const mimeType = await detectMimeType(response)
     logger.debug('检测到MIME类型', { mimeType })
 
     return [response, mimeType]
