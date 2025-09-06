@@ -13,7 +13,8 @@
     "types": [
       "node"
     ],
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": [
     "src"

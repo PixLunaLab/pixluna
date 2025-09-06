@@ -7,7 +7,8 @@ const external = new RegExp(
 )
 
 const config = {
-  input: './src/index.ts'
+  input: './src/index.ts',
+  tsconfig: './tsconfig.json'
 }
 
 export default defineConfig([
