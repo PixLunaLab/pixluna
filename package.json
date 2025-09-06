@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "file-type": "^21.0.0",
-    "wasm-vips": "^0.0.14"
+    "jimp": "^1.6.0"
   },
   "koishi": {
     "description": {

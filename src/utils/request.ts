@@ -32,8 +32,8 @@ export async function fetchImageBuffer(
       headers
     })
 
-    const mimeType = await detectMimeType(response)
-    logger.debug('检测到MIME类型', { mimeType })
+    const mimeType = detectMimeType(response)
+    logger.debug('检测到 MIME 类型', { mimeType })
 
     return [response, mimeType]
   })
@@ -60,7 +60,6 @@ export async function getRemoteImage(
     {
       r18: config.isR18 && Math.random() < config.r18P,
       excludeAI: config.excludeAI,
-      // 直接传递标签，不再预处理标签，留给各个提供器处理
       tag: tag || void 0,
       proxy: config.baseUrl ? config.baseUrl : void 0
     }
@@ -75,20 +74,48 @@ export async function getRemoteImage(
     getProvider(ctx, config, specificProvider)
   )
 
-  const data = await taskTime(ctx, 'processImage', async () => {
-    const imageBuffer = Buffer.from(buffer)
-    return await processImage(
-      ctx,
-      imageBuffer,
-      config,
-      !!metadata.data.urls?.regular
-    )
-  })
+  const hasRegular = !!metadata.data.urls?.regular
+  const doFlip = !!config.imageProcessing.isFlip
+  const doConfuse = !!config.imageProcessing.confusion
+  const doCompress = !!config.imageProcessing.compress && !hasRegular
 
-  return {
-    ...metadata.data.raw,
-    data,
-    mimeType,
-    raw: metadata.data.raw
+  const MAX_PROCESS_BYTES = 32 * 1024 * 1024
+  const isTooLarge = (buffer as ArrayBuffer).byteLength >= MAX_PROCESS_BYTES
+
+  if (!isTooLarge && (doFlip || doConfuse || doCompress)) {
+    const data = await taskTime(ctx, 'processImage', async () => {
+      const imageBuffer = Buffer.from(buffer)
+      return await processImage(ctx, imageBuffer, config, hasRegular)
+    })
+
+    const isPng =
+      data &&
+      data.length >= 4 &&
+      data[0] === 0x89 &&
+      data[1] === 0x50 &&
+      data[2] === 0x4e &&
+      data[3] === 0x47
+
+    return {
+      ...metadata.data.raw,
+      data,
+      mimeType: isPng ? 'image/png' : mimeType,
+      raw: metadata.data.raw
+    }
+  } else {
+    if (isTooLarge && (doFlip || doConfuse || doCompress)) {
+      logger.warn('图片过大，已跳过处理并原样发送', {
+        sizeMB:
+          Math.round(((buffer as ArrayBuffer).byteLength / 1024 / 1024) * 10) /
+          10
+      })
+    }
+    const data = Buffer.from(buffer)
+    return {
+      ...metadata.data.raw,
+      data,
+      mimeType,
+      raw: metadata.data.raw
+    }
   }
 }

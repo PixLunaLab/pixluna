@@ -44,7 +44,7 @@ export interface Config {
   imageProcessing: {
     confusion: boolean
     compress: boolean
-    compressQuality: number
+    compressionLevel: number
     isFlip: boolean
     flipMode: 'horizontal' | 'vertical' | 'both'
   }
@@ -113,11 +113,11 @@ export const Config: Schema<Config> = Schema.intersect([
           '是否压缩图片（能大幅度提升发送的速度，但是对图片质量有影响）'
         ),
 
-      compressQuality: Schema.percent()
-        .default(65)
-        .description('图片压缩质量')
-        .min(1)
-        .max(100)
+      compressionLevel: Schema.number()
+        .default(6)
+        .description('压缩等级（0-9，数值越大压缩越强）')
+        .min(0)
+        .max(9)
         .step(1),
 
       isFlip: Schema.boolean()

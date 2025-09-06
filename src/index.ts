@@ -34,7 +34,7 @@ export function apply(ctx: Context, config: Config) {
     .option('tag', '-t <tags:string>', { fallback: '' })
     .action(async ({ session, options }) => {
       if (!Number.isInteger(options.number) || options.number <= 0) {
-        return createAtMessage(session.userId, '图片数量必须是大于0的整数哦~')
+        return createAtMessage(session.userId, '图片数量必须是大于 0 的整数哦~')
       }
 
       if (config.messageBefore) {
