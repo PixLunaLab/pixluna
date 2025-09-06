@@ -9,7 +9,7 @@ import {
   type SourceResponse
 } from '../utils/type'
 import { logger } from '../index'
-import { Provider } from '../utils/providerRegistry'
+import { registerProvider } from '../utils/providerRegistry'
 
 interface E621Post {
   id: number
@@ -37,7 +37,6 @@ interface E621Post {
   rating: string
 }
 
-@Provider('e621')
 export class E621SourceProvider extends SourceProvider {
   static description = '通过 E621 API 获取图片'
   protected endpoint = 'https://e621.net'
@@ -155,3 +154,5 @@ export class E621SourceProvider extends SourceProvider {
     }
   }
 }
+
+registerProvider('e621', E621SourceProvider)

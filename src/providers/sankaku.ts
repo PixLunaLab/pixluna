@@ -10,7 +10,7 @@ import type {
 import { SourceProvider } from '../utils/type'
 import { logger } from '../index'
 import { USER_AGENT } from '../utils/request'
-import { Provider } from '../utils/providerRegistry'
+import { registerProvider } from '../utils/providerRegistry'
 
 interface SankakuPost {
   id: number
@@ -24,7 +24,6 @@ interface SankakuPost {
   created_at: string
 }
 
-@Provider('sankaku')
 export class SankakuSourceProvider extends SourceProvider {
   static description = '通过 Sankaku Complex API 获取图片'
   protected endpoint = 'https://capi-v2.sankakucomplex.com'
@@ -158,3 +157,5 @@ export class SankakuSourceProvider extends SourceProvider {
     this.config = config
   }
 }
+
+registerProvider('sankaku', SankakuSourceProvider)

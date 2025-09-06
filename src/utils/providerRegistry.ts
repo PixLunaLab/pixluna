@@ -28,7 +28,7 @@ export function registerProvider(
     const alias = String(raw).trim()
     if (!alias) continue
     const existing = reg.get(alias)
-    if (existing) {
+    if (!existing || existing !== ctor) {
       reg.set(alias, ctor)
     }
   }
@@ -42,10 +42,4 @@ export function resolveProvider(name: string): ProviderCtor | undefined {
 export function listProviders(): string[] {
   const reg = ensureRegistry()
   return Array.from(reg.keys())
-}
-
-export function Provider(aliases: string | string[]) {
-  return <T extends ProviderCtor>(ctor: T) => {
-    registerProvider(aliases, ctor)
-  }
 }

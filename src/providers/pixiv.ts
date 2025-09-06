@@ -16,7 +16,7 @@ import {
   renderImageMessage,
   renderMultipleImageMessage
 } from '../utils/messageBuilder'
-import { Provider } from '../utils/providerRegistry'
+import { registerProvider } from '../utils/providerRegistry'
 
 async function addDelay(
   config: Config,
@@ -164,7 +164,6 @@ abstract class PixivBaseProvider extends SourceProvider {
 }
 
 // Discovery
-@Provider('pdiscovery')
 export class PixivDiscoverySourceProvider extends PixivBaseProvider {
   static DISCOVERY_URL = 'https://www.pixiv.net/ajax/illust/discovery'
   static ILLUST_PAGES_URL =
@@ -262,7 +261,6 @@ export class PixivDiscoverySourceProvider extends PixivBaseProvider {
 }
 
 // Following
-@Provider('pfollowing')
 export class PixivFollowingSourceProvider extends PixivBaseProvider {
   static description = '获取 Pixiv 已关注画师作品，需要 Pixiv 账号'
   static FOLLOWING_URL =
@@ -713,3 +711,6 @@ export class PixivGetByIDProvider extends PixivBaseProvider {
     }
   }
 }
+
+registerProvider('pdiscovery', PixivDiscoverySourceProvider)
+registerProvider('pfollowing', PixivFollowingSourceProvider)

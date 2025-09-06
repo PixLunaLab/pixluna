@@ -10,7 +10,7 @@ import {
 } from '../utils/type'
 import { logger } from '../index'
 import { createHash } from 'node:crypto'
-import { Provider } from '../utils/providerRegistry'
+import { registerProvider } from '../utils/providerRegistry'
 
 interface YandePost {
   id: number
@@ -24,7 +24,6 @@ interface YandePost {
   rating: string
 }
 
-@Provider('yande')
 export class YandeSourceProvider extends SourceProvider {
   static description = '通过 Yande.re API 获取图片'
   protected endpoint = 'https://yande.re'
@@ -148,3 +147,5 @@ export class YandeSourceProvider extends SourceProvider {
     }
   }
 }
+
+registerProvider('yande', YandeSourceProvider)
