@@ -5,10 +5,10 @@ import type { SourceProvider } from './type'
 export type ProviderCtor = new (ctx: Context, config: Config) => SourceProvider
 
 declare global {
-  var __PIX_LUNA_PROVIDERS__: Map<string, ProviderCtor> | undefined
+  var __PIXLUNA_PROVIDERS__: Map<string, ProviderCtor> | undefined
 }
 
-const globalKey = '__PIX_LUNA_PROVIDERS__'
+const globalKey = '__PIXLUNA_PROVIDERS__'
 
 function ensureRegistry(): Map<string, ProviderCtor> {
   const g = globalThis as any
