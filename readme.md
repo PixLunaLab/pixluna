@@ -73,7 +73,7 @@ pixluna -n 5 黑丝
 
 ## Wiki
 
-[PixLunaLab/pixluna | DeepWiki](PixLunaLab/pixluna)（英语）
+[PixLunaLab/pixluna | DeepWiki](http://deepwiki.com/PixLunaLab/pixluna)（英语）
 
 ## 贡献者名单
 
