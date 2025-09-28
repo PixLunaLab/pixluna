@@ -1,7 +1,7 @@
 import type { Context } from 'koishi'
 import type Config from '../config'
 import { logger } from '../index'
-import wasm from '@pixluna/wasm'
+import wasm from 'pixluna-wasm'
 
 function getPngDeflateLevel(config: Config): number {
   return Math.max(0, Math.min(9, config.imageProcessing.compressionLevel ?? 6))
