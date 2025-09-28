@@ -1,5 +1,5 @@
 [package]
-name = "pixluna-rs"
+name = "pixluna-rslib"
 version = "0.1.0"
 edition = "2024"
 
