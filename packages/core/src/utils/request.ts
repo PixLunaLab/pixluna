@@ -4,7 +4,7 @@ import { taskTime } from './taskManager'
 import { processImage } from './imageProcessing'
 import { getProvider } from '../providers'
 import { logger } from '../index'
-import { detect_mime } from 'pixluna-rs'
+import { detect_mime } from 'pixluna-rslib'
 import type {} from '@koishijs/plugin-proxy-agent'
 import type Config from '../config'
 
