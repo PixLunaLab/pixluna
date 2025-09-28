@@ -1,6 +1,6 @@
 {
   "name": "pixluna-rslib",
-  "description": "",
+  "description": "Extra library for pixluna written in Rust",
   "version": "1.0.0-beta.1",
   "main": "lib/wasm.js",
   "types": "lib/wasm.d.ts",
@@ -20,7 +20,7 @@
     "publish": "yarn npm publish"
   },
   "license": "MPL-2.0",
-  "homepage": "https://github.com/PixLunaLab/pixluna/packages/wasm",
+  "homepage": "https://github.com/PixLunaLab/pixluna/packages/rslib",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PixLunaLab/pixluna"
