@@ -41,7 +41,6 @@ export async function mixImage(
   config: Config
 ): Promise<Buffer> {
   try {
-    // 保持原有流程：若开启 compress，则先质量压缩再混淆
     if (config.imageProcessing.compress) {
       imageBuffer = await qualityImage(imageBuffer, config)
     }
