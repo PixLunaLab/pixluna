@@ -24,7 +24,7 @@
     "lint-fix": "biome format --write && biome lint --write"
   },
   "license": "MPL-2.0",
-  "homepage": "https://github.com/PixLunaLab/pixluna/packages/core",
+  "homepage": "https://github.com/PixLunaLab/pixluna",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PixLunaLab/pixluna"
