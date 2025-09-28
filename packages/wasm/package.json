@@ -1,0 +1,38 @@
+{
+  "name": "@pixluna/wasm",
+  "description": "",
+  "version": "1.0.0-beta.1",
+  "main": "lib/wasm.js",
+  "types": "lib/wasm.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/wasm.d.ts",
+      "require": "./lib/wasm.js",
+      "import": "./lib/wasm.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "wasm-pack build ./ --release --target nodejs --out-dir lib --out-name wasm",
+    "publish": "yarn npm publish"
+  },
+  "license": "MPL-2.0",
+  "homepage": "https://github.com/PixLunaLab/pixluna/packages/wasm",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PixLunaLab/pixluna"
+  },
+  "keywords": [
+    "pixiv",
+    "koishi",
+    "plugin",
+    "色图",
+    "pixluna"
+  ],
+  "devDependencies": {
+    "wasm-pack": "^0.13.1"
+  }
+}

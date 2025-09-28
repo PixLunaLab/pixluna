@@ -31,3 +31,7 @@ package-lock.json
 
 kumoya
 .VSCodeCounter
+
+# Added by cargo
+
+target
