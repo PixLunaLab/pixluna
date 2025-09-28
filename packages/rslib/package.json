@@ -1,7 +1,7 @@
 {
   "name": "pixluna-rslib",
   "description": "Extra library for pixluna written in Rust",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "main": "lib/wasm.js",
   "types": "lib/wasm.d.ts",
   "exports": {
@@ -16,7 +16,8 @@
     "lib"
   ],
   "scripts": {
-    "build": "wasm-pack build ./ --release --target nodejs --out-dir lib --out-name wasm",
+    "build": "wasm-pack build ./ --release --target nodejs --out-dir lib --out-name wasm && rimraf ./lib/.gitignore ./lib/package.json",
+    "update": "cargo update",
     "publish": "yarn npm publish"
   },
   "license": "MPL-2.0",
@@ -33,6 +34,7 @@
     "pixluna"
   ],
   "devDependencies": {
+    "rimraf": "^6.0.1",
     "wasm-pack": "^0.13.1"
   }
 }
