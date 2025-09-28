@@ -1,7 +1,7 @@
 {
   "name": "pixluna-rslib",
   "description": "Extra library for pixluna written in Rust",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "main": "lib/wasm.js",
   "types": "lib/wasm.d.ts",
   "exports": {
