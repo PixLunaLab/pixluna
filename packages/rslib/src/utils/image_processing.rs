@@ -1,5 +1,5 @@
 use image::codecs::png::{CompressionType, FilterType, PngEncoder};
-use image::ImageEncoder; // for write_image on PngEncoder
+use image::ImageEncoder;
 use image::{
     imageops::flip_horizontal_in_place, imageops::flip_vertical_in_place, ColorType, DynamicImage,
     RgbaImage,
@@ -78,7 +78,7 @@ pub fn process_image(
     input: &[u8],
     is_flip: bool,
     flip_mode: u8,   // 0 none, 1 horizontal, 2 vertical, 3 both
-    confusion: bool, // chaos pixel mutate
+    confusion: bool,
     compress: bool,
     compression_level: u8,
     has_regular_url: bool,
@@ -87,7 +87,6 @@ pub fn process_image(
         return input.to_vec();
     };
 
-    // Start from decoded image
     let mut rgba = img.to_rgba8();
 
     // Optional flip first (to match TS behavior order)
