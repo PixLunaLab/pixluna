@@ -4,7 +4,7 @@ import { taskTime } from './taskManager'
 import { processImage } from './imageProcessing'
 import { getProvider } from '../providers'
 import { logger } from '../index'
-import { detectMimeType } from './mimeUtils'
+import { detect_mime } from 'pixluna-rs'
 import type {} from '@koishijs/plugin-proxy-agent'
 import type Config from '../config'
 
@@ -32,7 +32,7 @@ export async function fetchImageBuffer(
       headers
     })
 
-    const mimeType = detectMimeType(response)
+    const mimeType = detect_mime(new Uint8Array(response))
     logger.debug('检测到 MIME 类型', { mimeType })
 
     return [response, mimeType]

@@ -1,7 +1,7 @@
 import type { Context } from 'koishi'
 import type Config from '../config'
 import { logger } from '../index'
-import wasm from 'pixluna-wasm'
+import { quality_image, mix_image, process_image } from 'pixluna-rs'
 
 function getPngDeflateLevel(config: Config): number {
   return Math.max(0, Math.min(9, config.imageProcessing.compressionLevel ?? 6))
@@ -26,7 +26,7 @@ export async function qualityImage(
 ): Promise<Buffer> {
   try {
     const level = getPngDeflateLevel(config)
-    const out = wasm.quality_image(new Uint8Array(imageBuffer), level)
+    const out = quality_image(new Uint8Array(imageBuffer), level)
     return Buffer.from(out)
   } catch (err) {
     logger.warn('qualityImage: decode failed, return original buffer', {
@@ -46,7 +46,7 @@ export async function mixImage(
       imageBuffer = await qualityImage(imageBuffer, config)
     }
     const level = getPngDeflateLevel(config)
-    const out = wasm.mix_image(new Uint8Array(imageBuffer), level)
+    const out = mix_image(new Uint8Array(imageBuffer), level)
     return Buffer.from(out)
   } catch (err) {
     logger.warn('mixImage: decode failed, return original buffer', { err })
@@ -61,7 +61,7 @@ export async function processImage(
   hasRegularUrl: boolean
 ): Promise<Buffer> {
   try {
-    const out = wasm.process_image(
+    const out = process_image(
       new Uint8Array(imageBuffer),
       !!config.imageProcessing.isFlip,
       mapFlipMode(config.imageProcessing.flipMode),

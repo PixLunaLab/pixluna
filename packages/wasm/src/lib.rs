@@ -34,3 +34,8 @@ pub fn process_image(
         has_regular_url,
     )
 }
+
+#[wasm_bindgen]
+pub fn detect_mime(input: &[u8]) -> String {
+    utils::mime::detect_mime(input)
+}

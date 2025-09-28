@@ -1,5 +1,5 @@
 {
-  "name": "pixluna-wasm",
+  "name": "pixluna-rs",
   "description": "",
   "version": "1.0.0-beta.1",
   "main": "lib/wasm.js",
