@@ -1,9 +1,9 @@
 use image::codecs::png::{CompressionType, FilterType, PngEncoder};
-use image::{
-    ColorType, DynamicImage, RgbaImage, imageops::flip_horizontal_in_place,
-    imageops::flip_vertical_in_place,
-};
 use image::ImageEncoder; // for write_image on PngEncoder
+use image::{
+    imageops::flip_horizontal_in_place, imageops::flip_vertical_in_place, ColorType, DynamicImage,
+    RgbaImage,
+};
 use js_sys::Math;
 
 fn map_compression(level: u8) -> CompressionType {
