@@ -1,6 +1,6 @@
 import type { Context } from 'koishi'
 import type Config from '../config'
-import { PixivGetByIDProvider } from '../providers/pixiv'
+import { PixivGetByIDProvider } from './pixiv'
 
 export async function getPixivImageByID(
   ctx: Context,
