@@ -88,18 +88,12 @@ export async function getRemoteImage(
       return await processImage(ctx, imageBuffer, config, hasRegular)
     })
 
-    const isPng =
-      data &&
-      data.length >= 4 &&
-      data[0] === 0x89 &&
-      data[1] === 0x50 &&
-      data[2] === 0x4e &&
-      data[3] === 0x47
+    const processedMimeType = detect_mime(new Uint8Array(data))
 
     return {
       ...metadata.data.raw,
       data,
-      mimeType: isPng ? 'image/png' : mimeType,
+      mimeType: processedMimeType,
       raw: metadata.data.raw
     }
   } else {

@@ -77,4 +77,3 @@ export async function processImage(
     return imageBuffer
   }
 }
-
