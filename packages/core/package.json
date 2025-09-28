@@ -1,0 +1,61 @@
+{
+  "name": "koishi-plugin-pixluna",
+  "description": "比较新的涩图插件（？",
+  "version": "2.3.10-beta.8",
+  "main": "lib/index.cjs",
+  "module": "lib/index.mjs",
+  "types": "lib/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "require": "./lib/index.cjs",
+      "import": "./lib/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "rolldown -c rolldown.config.js",
+    "publish": "yarn npm publish",
+    "lint": "biome check && biome lint",
+    "lint-fix": "biome format --write && biome lint --write"
+  },
+  "license": "MPL-2.0",
+  "homepage": "https://github.com/PixLunaLab/pixluna/packages/core",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PixLunaLab/pixluna"
+  },
+  "keywords": [
+    "pixiv",
+    "koishi",
+    "plugin",
+    "色图",
+    "pixluna"
+  ],
+  "peerDependencies": {
+    "@koishijs/plugin-proxy-agent": "^0.3.3",
+    "koishi": "^4.17.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.3",
+    "@koishijs/plugin-proxy-agent": "^0.3.3",
+    "@types/node": "^24.3.1",
+    "koishi": "^4.18.9",
+    "rolldown": "1.0.0-beta.35",
+    "rolldown-plugin-dts": "^0.16.1",
+    "wasm-pack": "^0.13.1"
+  },
+  "dependencies": {
+    "file-type": "^21.0.0",
+    "jimp": "^1.6.0"
+  },
+  "koishi": {
+    "description": {
+      "zh": "比较新的涩图插件（？"
+    }
+  }
+}
