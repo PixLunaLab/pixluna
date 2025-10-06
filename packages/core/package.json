@@ -41,12 +41,12 @@
     "koishi": "^4.17.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.2.3",
+    "@biomejs/biome": "^2.2.5",
     "@koishijs/plugin-proxy-agent": "^0.3.3",
-    "@types/node": "^24.3.1",
+    "@types/node": "^24.6.2",
     "koishi": "^4.18.9",
-    "rolldown": "1.0.0-beta.35",
-    "rolldown-plugin-dts": "^0.16.1"
+    "rolldown": "1.0.0-beta.41",
+    "rolldown-plugin-dts": "^0.16.11"
   },
   "dependencies": {
     "pixluna-rslib": "^1.0.0-beta.3"

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.2.5/schema.json",
   "root": true,
   "vcs": {
     "enabled": true,
@@ -34,7 +34,8 @@
     "rules": {
       "recommended": true,
       "security": {
-        "noGlobalEval": "error"
+        "noGlobalEval": "error",
+        "noDangerouslySetInnerHtml": "off"
       },
       "suspicious": {
         "noArrayIndexKey": "off",
@@ -46,6 +47,9 @@
       },
       "correctness": {
         "noUnusedImports": "on"
+      },
+      "a11y": {
+        "useSemanticElements": "off"
       }
     }
   },
