@@ -1,38 +1,11 @@
 {
   "name": "pixluna-rslib",
-  "description": "Extra library for pixluna written in Rust",
-  "version": "1.0.0-beta.3",
+  "private": true,
   "main": "lib/wasm.js",
   "types": "lib/wasm.d.ts",
-  "exports": {
-    ".": {
-      "types": "./lib/wasm.d.ts",
-      "require": "./lib/wasm.js",
-      "import": "./lib/wasm.js"
-    },
-    "./package.json": "./package.json"
-  },
-  "files": [
-    "lib"
-  ],
   "scripts": {
-    "build": "wasm-pack build ./ --release --target nodejs --out-dir lib --out-name wasm && rimraf ./lib/.gitignore ./lib/package.json",
-    "update": "cargo update",
-    "publish": "yarn npm publish"
+    "build": "wasm-pack build ./ --release --target nodejs --out-dir lib --out-name wasm && rimraf ./lib/.gitignore ./lib/package.json"
   },
-  "license": "MPL-2.0",
-  "homepage": "https://github.com/PixLunaLab/pixluna",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/PixLunaLab/pixluna"
-  },
-  "keywords": [
-    "pixiv",
-    "koishi",
-    "plugin",
-    "色图",
-    "pixluna"
-  ],
   "devDependencies": {
     "rimraf": "^6.0.1",
     "wasm-pack": "^0.13.1"

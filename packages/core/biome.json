@@ -43,7 +43,8 @@
         "noPrototypeBuiltins": "off",
         "noRedeclare": "off",
         "noVar": "warn",
-        "noUnknownAtRules": "off"
+        "noUnknownAtRules": "off",
+        "noImplicitAnyLet": "off"
       },
       "correctness": {
         "noUnusedImports": "on"
