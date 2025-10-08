@@ -4,10 +4,9 @@
   "main": "lib/wasm.js",
   "types": "lib/wasm.d.ts",
   "scripts": {
-    "build": "wasm-pack build ./ --release --target nodejs --out-dir lib --out-name wasm && rimraf ./lib/.gitignore ./lib/package.json"
+    "build": "wasm-pack build ./ --release --target nodejs --out-dir lib --out-name wasm"
   },
   "devDependencies": {
-    "rimraf": "^6.0.1",
     "wasm-pack": "^0.13.1"
   }
 }
