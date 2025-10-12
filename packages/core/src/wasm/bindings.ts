@@ -1,6 +1,6 @@
 // @ts-nocheck
 // Sync from rslib
-import wasmModuleBuffer from '../../../rslib/lib/wasm_bg.wasm'
+import wasmModule from '../../../rslib/lib/wasm_bg.wasm'
 
 
 const imports: any = {}
@@ -128,10 +128,10 @@ imports.__wbindgen_init_externref_table = function() {
 
 
 
-const wasmModule = wasmModuleBuffer instanceof Uint8Array
-  ? wasmModuleBuffer
-  : new Uint8Array(wasmModuleBuffer)
+const wasmModuleBuffer = wasmModule instanceof Uint8Array
+  ? wasmModule
+  : new Uint8Array(wasmModule)
 
-const wasmInstance = new WebAssembly.Instance(new WebAssembly.Module(wasmModule), { __wbindgen_placeholder__: imports })
+const wasmInstance = new WebAssembly.Instance(new WebAssembly.Module(wasmModuleBuffer), { __wbindgen_placeholder__: imports })
 wasm = wasmInstance.exports
 wasm.__wbindgen_start()
