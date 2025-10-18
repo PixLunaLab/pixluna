@@ -22,6 +22,8 @@ try {
 // Sync from rslib
 import wasmModule from '../../../rslib/lib/wasm_bg.wasm'
 
+let wasm: any
+
 `
 
   const initCode = `
