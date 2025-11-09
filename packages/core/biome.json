@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.6/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.4/schema.json",
   "root": true,
   "vcs": {
     "enabled": true,
@@ -9,11 +9,9 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "experimentalScannerIgnores": [
-      "*.lock"
-    ],
     "includes": [
-      "**"
+      "**",
+      "!!**/*.lock"
     ]
   },
   "formatter": {
