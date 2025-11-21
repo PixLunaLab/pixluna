@@ -5,8 +5,5 @@
   "types": "lib/wasm.d.ts",
   "scripts": {
     "build": "wasm-pack build ./ --release --target nodejs --out-dir lib --out-name wasm"
-  },
-  "devDependencies": {
-    "wasm-pack": "^0.13.1"
   }
 }
