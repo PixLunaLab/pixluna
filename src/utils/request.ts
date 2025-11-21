@@ -1,10 +1,9 @@
 import type { Context } from 'koishi'
 import type { GeneralImageData, SourceProvider } from './type'
 import { taskTime } from './taskManager'
-import { processImage } from './imageProcessing'
+import { processImage, detectImageFormat } from './imageProcessing'
 import { getProvider } from '../providers'
 import { logger } from '../index'
-import { detect_mime } from '../wasm/bindings'
 import type {} from '@koishijs/plugin-proxy-agent'
 import type Config from '../config'
 
@@ -32,7 +31,8 @@ export async function fetchImageBuffer(
       headers
     })
 
-    const mimeType = detect_mime(new Uint8Array(response))
+    const buffer = Buffer.from(response)
+    const mimeType = (await detectImageFormat(buffer)) || 'image/png'
     logger.debug('检测到 MIME 类型', { mimeType })
 
     return [response, mimeType]
@@ -88,7 +88,7 @@ export async function getRemoteImage(
       return await processImage(ctx, imageBuffer, config, hasRegular)
     })
 
-    const processedMimeType = detect_mime(new Uint8Array(data))
+    const processedMimeType = (await detectImageFormat(data)) || 'image/png'
 
     return {
       ...metadata.data.raw,

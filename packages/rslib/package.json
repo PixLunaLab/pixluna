@@ -1,9 +1,0 @@
-{
-  "name": "pixluna-rslib",
-  "private": true,
-  "main": "lib/wasm.js",
-  "types": "lib/wasm.d.ts",
-  "scripts": {
-    "build": "wasm-pack build ./ --release --target nodejs --out-dir lib --out-name wasm"
-  }
-}
