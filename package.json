@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-pixluna",
   "description": "比较新的涩图插件（？",
-  "version": "2.3.15",
+  "version": "2.3.16",
   "main": "lib/index.cjs",
   "module": "lib/index.mjs",
   "types": "lib/index.d.ts",
@@ -41,12 +41,12 @@
     "koishi": "^4.17.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.4",
+    "@biomejs/biome": "^2.3.8",
     "@koishijs/plugin-proxy-agent": "^0.3.3",
-    "@types/node": "^24.10.0",
+    "@types/node": "^25.0.2",
     "koishi": "^4.18.9",
-    "rolldown": "1.0.0-beta.47",
-    "rolldown-plugin-dts": "^0.17.3"
+    "rolldown": "1.0.0-beta.54",
+    "rolldown-plugin-dts": "^0.18.3"
   },
   "koishi": {
     "description": {
@@ -54,7 +54,7 @@
     }
   },
   "dependencies": {
-    "file-type": "^21.1.1",
+    "image-type": "^6.0.0",
     "wasm-vips": "^0.0.16"
   }
 }

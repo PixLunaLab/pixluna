@@ -2,13 +2,13 @@ import type { Context } from 'koishi'
 import type Config from '../config'
 import { logger } from '../index'
 import Vips from 'wasm-vips'
-import { fileTypeFromBuffer } from 'file-type'
+import imageType from 'image-type'
 
 export async function detectImageFormat(
   buffer: Buffer
 ): Promise<string | null> {
-  const fileType = await fileTypeFromBuffer(buffer)
-  return fileType?.mime ?? null
+  const type = await imageType(buffer)
+  return type?.mime ?? null
 }
 
 const vipsPromise = Vips({
