@@ -49,7 +49,7 @@ export async function detectImageFormat(
 
   // AVIF: ... 66 74 79 70 61 76 69 66
   if (buffer.length >= 12) {
-    const avifCheck = buffer.slice(4, 12).toString('ascii')
+    const avifCheck = buffer.subarray(4, 12).toString('ascii')
     if (avifCheck === 'ftypavif' || avifCheck === 'ftypavis') {
       return 'image/avif'
     }
