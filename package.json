@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-pixluna",
   "description": "比较新的涩图插件（？",
-  "version": "2.3.16",
+  "version": "2.3.17",
   "main": "lib/index.cjs",
   "module": "lib/index.mjs",
   "types": "lib/index.d.ts",
@@ -54,7 +54,6 @@
     }
   },
   "dependencies": {
-    "image-type": "^6.0.0",
     "wasm-vips": "^0.0.16"
   }
 }
