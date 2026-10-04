@@ -1,10 +1,10 @@
-import type { Context, Logger } from 'koishi'
+import type { Context, Logger } from "koishi"
 
 const loggers: Record<string, Logger> = {}
 
 let logLevel = -1
 
-export function createLogger(ctx: Context, name: string = 'pixluna') {
+export function createLogger(ctx: Context, name: string = "pixluna") {
   const result = loggers[name] || ctx.logger(name)
 
   if (logLevel >= 0) {

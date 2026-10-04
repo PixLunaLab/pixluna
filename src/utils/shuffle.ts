@@ -1,4 +1,4 @@
-import { webcrypto } from 'node:crypto'
+import { webcrypto } from "node:crypto"
 
 export function shuffleArray<T>(array: T[]): T[] {
   if (array.length <= 1) {

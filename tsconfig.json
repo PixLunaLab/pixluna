@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "rootDir": "src",
+    "rootDir": ".",
     "outDir": "lib",
     "target": "ES2022",
+    "lib": ["ES2024", "DOM"],
     "module": "ESNext",
     "declaration": true,
     "emitDeclarationOnly": false,
@@ -10,11 +11,7 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "moduleResolution": "bundler",
-    "types": [
-      "node"
-    ]
+    "types": ["node"]
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src", "test"]
 }

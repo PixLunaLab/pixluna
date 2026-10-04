@@ -20,8 +20,10 @@
   "scripts": {
     "build": "yarn rolldown -c rolldown.config.js",
     "publish": "yarn npm publish",
-    "lint": "biome check && biome lint",
-    "lint-fix": "biome format --write && biome lint --write"
+    "lint": "oxlint",
+    "lint-fix": "oxlint --fix && oxfmt",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check"
   },
   "license": "MPL-2.0",
   "homepage": "https://github.com/PixLunaLab/pixluna",
@@ -41,12 +43,15 @@
     "koishi": "^4.17.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.8",
     "@koishijs/plugin-proxy-agent": "^0.3.3",
-    "@types/node": "^25.0.2",
+    "@types/node": "^26.0.1",
     "koishi": "^4.18.9",
     "rolldown": "1.0.0-beta.54",
-    "rolldown-plugin-dts": "^0.18.3"
+    "rolldown-plugin-dts": "^0.18.3",
+    "oxfmt": "^0.71.0",
+    "oxlint": "^1.86.0",
+    "oxlint-tsgolint": "^7.0.2003",
+    "typescript": "^6.0.3"
   },
   "koishi": {
     "description": {
