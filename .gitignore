@@ -37,3 +37,4 @@ kumoya
 target
 
 **/wasm/bindings.ts
+.vscode/
