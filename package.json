@@ -8,9 +8,14 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./lib/index.d.ts",
-      "require": "./lib/index.cjs",
-      "import": "./lib/index.mjs"
+      "import": {
+        "types": "./lib/index.d.ts",
+        "default": "./lib/index.mjs"
+      },
+      "require": {
+        "types": "./lib/index.d.cts",
+        "default": "./lib/index.cjs"
+      }
     },
     "./package.json": "./package.json"
   },
@@ -18,7 +23,7 @@
     "lib"
   ],
   "scripts": {
-    "build": "yarn rolldown -c rolldown.config.js",
+    "build": "tsdown",
     "publish": "yarn npm publish",
     "lint": "oxlint",
     "lint-fix": "oxlint --fix && oxfmt",
@@ -46,12 +51,11 @@
     "@koishijs/plugin-proxy-agent": "^0.3.3",
     "@types/node": "^26.0.1",
     "koishi": "^4.18.9",
-    "rolldown": "1.0.0-beta.54",
-    "rolldown-plugin-dts": "^0.18.3",
     "oxfmt": "^0.71.0",
     "oxlint": "^1.86.0",
     "oxlint-tsgolint": "^7.0.2003",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "tsdown": "^0.23.0"
   },
   "koishi": {
     "description": {
