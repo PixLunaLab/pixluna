@@ -15,6 +15,7 @@ export interface Config {
   isLog: boolean
   pixiv: {
     phpSESSID: string
+    refreshToken: string
     userId: string
   }
   danbooru?: {
@@ -166,6 +167,12 @@ export const Config: SchemaType<Config> = Schema.intersect([
       phpSESSID: Schema.string()
         .description(
           "Pixiv 的 PHPSESSID，用于访问个性化内容返回的图片分级取决于该 Pixiv 账号所有者的分级设置"
+        )
+        .role("secret")
+        .default(""),
+      refreshToken: Schema.string()
+        .description(
+          "Pixiv OAuth refresh token；非空时优先使用 App API，鉴权失败不会回退 Cookie；留空使用 PHPSESSID"
         )
         .role("secret")
         .default(""),
