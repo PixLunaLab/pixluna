@@ -1,5 +1,5 @@
-import type { Context } from 'koishi'
-import type { Config } from '../config'
+import type { Context } from "koishi"
+import type { Config } from "../config"
 import {
   type CommonSourceRequest,
   type GeneralImageData,
@@ -7,9 +7,9 @@ import {
   type ImageSourceMeta,
   SourceProvider,
   type SourceResponse
-} from '../utils/type'
-import { logger } from '../index'
-import { registerProvider } from '../utils/providerRegistry'
+} from "../utils/type"
+import { booruTags, isSafeRating, isAiTag, imageExtension, uploadTime } from "../utils/booru"
+import { registerProvider } from "../utils/providerRegistry"
 
 interface SafebooruPost {
   id: number
@@ -19,74 +19,82 @@ interface SafebooruPost {
   owner: string
   rating: string
   sample: boolean
-  created_at: string
+  file_url?: string
+  sample_url?: string
+  created_at?: string | number
 }
 
 export class SafebooruSourceProvider extends SourceProvider {
-  static description = '通过 Safebooru API 获取图片'
-  protected endpoint = 'https://safebooru.org/index.php'
+  static description = "通过 Safebooru API 获取图片"
+  protected endpoint = "https://safebooru.org/index.php"
 
   async getMetaData(
     { context }: { context: Context },
     props: CommonSourceRequest
   ): Promise<SourceResponse<ImageMetaData>> {
     try {
-      let tagString = ''
-      if (props.tag) {
-        tagString = props.tag
-          .split(/[,，]/)
-          .map((t) => t.trim())
-          .filter(Boolean)
-          .join(' ')
+      if (this.config.isR18 && props.r18) {
+        return { status: "error", data: new Error("Safebooru does not provide R18 images") }
       }
+      const tagString = booruTags(props.tag)
 
       const params = {
-        page: 'dapi',
-        s: 'post',
-        q: 'index',
-        json: '1',
-        limit: '1',
-        tags: `${tagString} sort:random`
+        page: "dapi",
+        s: "post",
+        q: "index",
+        json: "1",
+        limit: "1",
+        tags: `${tagString} sort:random rating:safe${props.excludeAI ? " -ai_generated -ai-assisted" : ""}`
       }
 
       const url = `${this.endpoint}?${new URLSearchParams(params).toString()}`
 
       const res = await context.http.get<SafebooruPost[]>(url, {
-        proxyAgent: this.config.isProxy ? this.config.proxyHost : undefined
+        proxyAgent: this.config.isProxy ? this.config.proxyHost : ""
       })
 
       if (!Array.isArray(res) || res.length === 0) {
         return {
-          status: 'error',
-          data: new Error('No image data returned')
+          status: "error",
+          data: new Error("No image data returned")
         }
       }
 
       const post = res[0]
-      const originalUrl = `https://safebooru.org/images/${post.directory}/${post.image}?${post.id}`
-      const sampleUrl = post.sample
-        ? `https://safebooru.org/samples/${post.directory}/sample_${post.image}?${post.id}`
-        : originalUrl
+      const tags = post.tags.split(" ")
+      if ((!this.config.isR18 || !props.r18) && !isSafeRating(post.rating)) {
+        return {
+          status: "error",
+          data: new Error("Upstream returned a restricted image for a safe request")
+        }
+      }
+      if (props.excludeAI && isAiTag(tags)) {
+        return {
+          status: "error",
+          data: new Error("Upstream returned an AI image despite exclusion")
+        }
+      }
+      const originalUrl =
+        post.file_url || `https://safebooru.org/images/${post.directory}/${post.image}?${post.id}`
+      const sampleUrl = post.sample_url || originalUrl
 
       const generalImageData: GeneralImageData = {
         id: post.id,
         title: `Safebooru - ${post.id}`,
-        author: post.owner.replace(/_/g, ' '),
-        r18: !['safe', 'general'].includes(post.rating),
-        tags: post.tags.split(' '),
-        extension: post.image.split('.').pop(),
-        aiType: 0,
-        uploadDate: new Date(post.created_at).getTime(),
+        author: post.owner.replace(/_/g, " "),
+        r18: !isSafeRating(post.rating),
+        tags,
+        extension: imageExtension(this.config.imageProcessing.compress ? sampleUrl : originalUrl),
+        aiType: isAiTag(tags) ? 2 : 0,
+        uploadDate: post.created_at === undefined ? 0 : uploadTime(post.created_at),
         urls: {
           original: originalUrl,
           regular: sampleUrl
         }
       }
 
-      logger.debug('成功获取图片元数据', { metadata: generalImageData })
-
       return {
-        status: 'success',
+        status: "success",
         data: {
           url: this.config.imageProcessing.compress ? sampleUrl : originalUrl,
           urls: {
@@ -96,17 +104,17 @@ export class SafebooruSourceProvider extends SourceProvider {
           raw: generalImageData
         }
       }
-    } catch (error) {
+    } catch {
       return {
-        status: 'error',
-        data: error
+        status: "error",
+        data: new Error("safebooru API request failed; check upstream availability and credentials")
       }
     }
   }
 
   getMeta(): ImageSourceMeta {
     return {
-      referer: 'https://safebooru.org'
+      referer: "https://safebooru.org"
     }
   }
 
@@ -115,4 +123,4 @@ export class SafebooruSourceProvider extends SourceProvider {
   }
 }
 
-registerProvider('safebooru', SafebooruSourceProvider)
+registerProvider("safebooru", SafebooruSourceProvider)

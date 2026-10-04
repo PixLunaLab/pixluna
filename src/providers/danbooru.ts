@@ -1,5 +1,5 @@
-import type { Context } from 'koishi'
-import type { Config } from '../config'
+import type { Context } from "koishi"
+import type { Config } from "../config"
 import {
   type CommonSourceRequest,
   type GeneralImageData,
@@ -7,9 +7,11 @@ import {
   type ImageSourceMeta,
   SourceProvider,
   type SourceResponse
-} from '../utils/type'
-import { logger } from '../index'
-import { registerProvider } from '../utils/providerRegistry'
+} from "../utils/type"
+import { booruTags, isAiTag, imageExtension, uploadTime } from "../utils/booru"
+import { registerProvider } from "../utils/providerRegistry"
+
+const CLIENT_USER_AGENT = "Pixluna/2.3 (Koishi plugin; https://github.com/PixLunaLab/pixluna)"
 
 interface DanbooruPost {
   id: number
@@ -24,15 +26,13 @@ interface DanbooruPost {
 }
 
 export class DanbooruSourceProvider extends SourceProvider {
-  static description = '通过 Danbooru API 获取图片'
-  protected endpoint = 'https://danbooru.donmai.us'
+  static description = "通过 Danbooru API 获取图片"
+  protected endpoint = "https://danbooru.donmai.us"
   private keyPairs: { login: string; apiKey: string }[] = []
 
   setConfig(config: Config): void {
     this.config = config
-    if (config.danbooru?.keyPairs?.length) {
-      this.keyPairs = config.danbooru.keyPairs
-    }
+    this.keyPairs = config.danbooru?.keyPairs || []
   }
 
   private get keyPair() {
@@ -47,16 +47,9 @@ export class DanbooruSourceProvider extends SourceProvider {
     try {
       const keyPair = this.keyPair
 
-      let tagString = ''
-      if (props.tag) {
-        tagString = props.tag
-          .split(/[,，]/)
-          .map((t) => t.trim())
-          .filter(Boolean)
-          .join(' ')
-      }
+      const tagString = booruTags(props.tag)
 
-      const params: Record<string, any> = {
+      const params: Record<string, string | number | boolean> = {
         tags: tagString,
         random: true,
         limit: 1,
@@ -64,72 +57,86 @@ export class DanbooruSourceProvider extends SourceProvider {
       }
 
       if (this.config.isR18 && props.r18) {
-        params.tags += ' rating:explicit'
+        params.tags += " rating:explicit"
       } else {
-        params.tags += ' rating:safe'
+        params.tags += " rating:general"
       }
 
-      const res = await context.http.get<DanbooruPost[]>(
-        `${this.endpoint}/posts.json`,
-        {
-          params,
-          proxyAgent: this.config.isProxy ? this.config.proxyHost : undefined
-        }
-      )
+      if (props.excludeAI) params.tags += " -ai-generated"
+
+      const res = await context.http.get<DanbooruPost[]>(`${this.endpoint}/posts.json`, {
+        params,
+        headers: { "User-Agent": CLIENT_USER_AGENT },
+        proxyAgent: this.config.isProxy ? this.config.proxyHost : ""
+      })
 
       if (!Array.isArray(res) || res.length === 0) {
         return {
-          status: 'error',
-          data: new Error('No image data returned')
+          status: "error",
+          data: new Error("No image data returned")
         }
       }
 
       const post = res[0]
-      const url = this.config.imageProcessing.compress
-        ? post.large_file_url
-        : post.file_url
+      const tags = post.tag_string.split(" ")
+      if ((!this.config.isR18 || !props.r18) && !["g", "general"].includes(post.rating)) {
+        return {
+          status: "error",
+          data: new Error("Upstream returned a restricted image for a safe request")
+        }
+      }
+      if (props.excludeAI && isAiTag(tags)) {
+        return {
+          status: "error",
+          data: new Error("Upstream returned an AI image despite exclusion")
+        }
+      }
+      if (!post.file_url) {
+        return { status: "error", data: new Error("Upstream returned no original image URL") }
+      }
+      const regularUrl = post.large_file_url || post.file_url
+      const url = this.config.imageProcessing.compress ? regularUrl : post.file_url
 
       const generalImageData: GeneralImageData = {
         id: post.id,
-        title: '',
-        author: post.tag_string_artist.replace(/_/g, ' '),
-        r18: post.rating === 'e' || post.rating === 'q',
-        tags: post.tag_string.split(' '),
-        extension: post.file_url.split('.').pop(),
-        aiType: 0,
-        uploadDate: new Date(post.created_at).getTime(),
+        title: "",
+        author: post.tag_string_artist.replace(/_/g, " "),
+        r18: !["g", "general"].includes(post.rating),
+        tags,
+        extension: imageExtension(url),
+        aiType: isAiTag(tags) ? 2 : 0,
+        uploadDate: uploadTime(post.created_at),
         urls: {
           original: post.file_url,
-          regular: post.large_file_url
+          regular: regularUrl
         }
       }
 
-      logger.debug('成功获取图片元数据', { metadata: generalImageData })
-
       return {
-        status: 'success',
+        status: "success",
         data: {
           url,
           urls: {
-            regular: post.large_file_url,
+            regular: regularUrl,
             original: post.file_url
           },
           raw: generalImageData
         }
       }
-    } catch (error) {
+    } catch {
       return {
-        status: 'error',
-        data: error
+        status: "error",
+        data: new Error("danbooru API request failed; check upstream availability and credentials")
       }
     }
   }
 
   getMeta(): ImageSourceMeta {
     return {
-      referer: 'https://danbooru.donmai.us'
+      referer: "https://danbooru.donmai.us",
+      userAgent: CLIENT_USER_AGENT
     }
   }
 }
 
-registerProvider('danbooru', DanbooruSourceProvider)
+registerProvider("danbooru", DanbooruSourceProvider)

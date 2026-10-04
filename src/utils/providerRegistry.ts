@@ -1,27 +1,21 @@
-import type { Context } from 'koishi'
-import type { Config } from '../config'
-import type { SourceProvider } from './type'
+import type { Context } from "koishi"
+import type { Config } from "../config"
+import type { SourceProvider } from "./type"
 
-export type ProviderCtor = new (ctx: Context, config: Config) => SourceProvider
+export type ProviderCtor = {
+  new (ctx: Context, config: Config): SourceProvider
+  description?: string
+}
 
 declare global {
   var __PIXLUNA_PROVIDERS__: Map<string, ProviderCtor> | undefined
 }
 
-const globalKey = '__PIXLUNA_PROVIDERS__'
-
 function ensureRegistry(): Map<string, ProviderCtor> {
-  const g = globalThis as any
-  if (!g[globalKey]) {
-    g[globalKey] = new Map<string, ProviderCtor>()
-  }
-  return g[globalKey] as Map<string, ProviderCtor>
+  return (globalThis.__PIXLUNA_PROVIDERS__ ??= new Map<string, ProviderCtor>())
 }
 
-export function registerProvider(
-  aliases: string | string[],
-  ctor: ProviderCtor
-) {
+export function registerProvider(aliases: string | string[], ctor: ProviderCtor) {
   const reg = ensureRegistry()
   const list = Array.isArray(aliases) ? aliases : [aliases]
   for (const raw of list) {

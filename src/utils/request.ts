@@ -1,14 +1,12 @@
-import type { Context } from 'koishi'
-import type { GeneralImageData, SourceProvider } from './type'
-import { taskTime } from './taskManager'
-import { processImage, detectImageFormat } from './imageProcessing'
-import { getProvider } from '../providers'
-import { logger } from '../index'
-import type {} from '@koishijs/plugin-proxy-agent'
-import type Config from '../config'
+import type { Context } from "koishi"
+import type { GeneralImageData, ImageMetaData, SourceProvider } from "./type"
+import { processImage, detectImageFormat } from "./imageProcessing"
+import { getProvider } from "../providers"
+import type {} from "@koishijs/plugin-proxy-agent"
+import type Config from "../config"
 
 export const USER_AGENT =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
 
 export async function fetchImageBuffer(
   ctx: Context,
@@ -16,32 +14,29 @@ export async function fetchImageBuffer(
   url: string,
   provider?: SourceProvider
 ): Promise<[ArrayBuffer, string]> {
-  return taskTime(ctx, 'fetchImage', async () => {
-    const headers: Record<string, string> = {
-      'User-Agent': USER_AGENT
-    }
-
-    if (provider?.getMeta?.()?.referer) {
-      headers.Referer = provider.getMeta().referer
-    }
-
-    const response = await ctx.http.get(url, {
-      responseType: 'arraybuffer',
-      proxyAgent: config.isProxy ? config.proxyHost : undefined,
+  const meta = provider?.getMeta()
+  const headers: Record<string, string> = { "User-Agent": meta?.userAgent || USER_AGENT }
+  const referer = meta?.referer
+  if (referer) headers.Referer = referer
+  let response: ArrayBuffer
+  try {
+    response = await ctx.http.get<ArrayBuffer>(url, {
+      responseType: "arraybuffer",
+      proxyAgent: config.isProxy ? config.proxyHost : "",
       headers
     })
-
-    const buffer = Buffer.from(response)
-    const mimeType = (await detectImageFormat(buffer)) || 'image/png'
-    logger.debug('检测到 MIME 类型', { mimeType })
-
-    return [response, mimeType]
-  })
+  } catch {
+    throw new Error("图片下载失败，请检查图源、代理和图片反代设置")
+  }
+  const buffer = Buffer.isBuffer(response) ? response : Buffer.from(response)
+  const mimeType = await detectImageFormat(buffer)
+  if (!mimeType) throw new Error("图源返回的不是支持的图片格式")
+  return [response, mimeType]
 }
 
 export async function getRemoteImage(
   ctx: Context,
-  tag: string,
+  tag: string | undefined,
   config: Config,
   specificProvider?: string
 ): Promise<
@@ -51,65 +46,50 @@ export async function getRemoteImage(
     raw: GeneralImageData
   }
 > {
-  if (!getProvider(ctx, config, specificProvider)) {
-    throw new Error('未选择有效的图片来源，请检查配置')
-  }
-
-  const metadata = await getProvider(ctx, config, specificProvider).getMetaData(
+  const provider = getProvider(ctx, config, specificProvider)
+  const r18 = config.isR18 && Math.random() < config.r18P
+  const metadata = await provider.getMetaData(
     { context: ctx },
     {
-      r18: config.isR18 && Math.random() < config.r18P,
+      r18,
       excludeAI: config.excludeAI,
-      tag: tag || void 0,
-      proxy: config.baseUrl ? config.baseUrl : void 0
+      tag: tag?.trim() || undefined,
+      proxy: config.baseUrl || undefined
     }
   )
-
-  if (metadata.status === 'error') return null
-
-  const [buffer, mimeType] = await fetchImageBuffer(
-    ctx,
-    config,
-    metadata.data.url,
-    getProvider(ctx, config, specificProvider)
-  )
-
-  const hasRegular = !!metadata.data.urls?.regular
-  const doFlip = !!config.imageProcessing.isFlip
-  const doConfuse = !!config.imageProcessing.confusion
-  const doCompress = !!config.imageProcessing.compress && !hasRegular
-
-  const MAX_PROCESS_BYTES = 32 * 1024 * 1024
-  const isTooLarge = (buffer as ArrayBuffer).byteLength >= MAX_PROCESS_BYTES
-
-  if (!isTooLarge && (doFlip || doConfuse || doCompress)) {
-    const data = await taskTime(ctx, 'processImage', async () => {
-      const imageBuffer = Buffer.from(buffer)
-      return await processImage(ctx, imageBuffer, config, hasRegular)
-    })
-
-    const processedMimeType = (await detectImageFormat(data)) || 'image/png'
-
-    return {
-      ...metadata.data.raw,
-      data,
-      mimeType: processedMimeType,
-      raw: metadata.data.raw
-    }
-  } else {
-    if (isTooLarge && (doFlip || doConfuse || doCompress)) {
-      logger.warn('图片过大，已跳过处理并原样发送', {
-        sizeMB:
-          Math.round(((buffer as ArrayBuffer).byteLength / 1024 / 1024) * 10) /
-          10
-      })
-    }
-    const data = Buffer.from(buffer)
-    return {
-      ...metadata.data.raw,
-      data,
-      mimeType,
-      raw: metadata.data.raw
-    }
+  if (metadata.status === "error") {
+    throw metadata.data instanceof Error ? metadata.data : new Error("图源未返回符合条件的图片")
   }
+  if ((!r18 && metadata.data.raw.r18) || (config.excludeAI && metadata.data.raw.aiType === 2)) {
+    throw new Error("图源返回的图片不符合内容过滤设置")
+  }
+  return downloadImage(ctx, config, metadata.data, provider)
+}
+
+export async function downloadImage(
+  ctx: Context,
+  config: Config,
+  metadata: ImageMetaData,
+  provider: SourceProvider
+): Promise<GeneralImageData & { data: Buffer; mimeType: string; raw: GeneralImageData }> {
+  const [buffer, mimeType] = await fetchImageBuffer(ctx, config, metadata.url, provider)
+  const original = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer)
+  const hasRegular =
+    metadata.url === metadata.urls.regular && metadata.urls.regular !== metadata.urls.original
+  const needsProcessing =
+    config.imageProcessing.isFlip ||
+    config.imageProcessing.confusion ||
+    (config.imageProcessing.compress && !hasRegular)
+  let data: Buffer = original
+  let resultMimeType = mimeType
+  if (needsProcessing) {
+    if (original.byteLength >= 32 * 1024 * 1024) {
+      throw new Error("图片超过 32 MiB，无法安全进行图片处理")
+    }
+    data = await processImage(ctx, original, config, hasRegular)
+    const processedMimeType = await detectImageFormat(data)
+    if (!processedMimeType) throw new Error("图片处理结果格式无效")
+    resultMimeType = processedMimeType
+  }
+  return { ...metadata.raw, data, mimeType: resultMimeType, raw: metadata.raw }
 }

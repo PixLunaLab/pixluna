@@ -1,5 +1,5 @@
-import type { Context } from 'koishi'
-import type { Config } from '../config'
+import type { Context } from "koishi"
+import type { Config } from "../config"
 import {
   type CommonSourceRequest,
   type GeneralImageData,
@@ -7,9 +7,9 @@ import {
   type ImageSourceMeta,
   SourceProvider,
   type SourceResponse
-} from '../utils/type'
-import { logger } from '../index'
-import { registerProvider } from '../utils/providerRegistry'
+} from "../utils/type"
+import { booruTags, isSafeRating, isAiTag, imageExtension, uploadTime } from "../utils/booru"
+import { registerProvider } from "../utils/providerRegistry"
 
 interface E621Post {
   id: number
@@ -38,15 +38,13 @@ interface E621Post {
 }
 
 export class E621SourceProvider extends SourceProvider {
-  static description = '通过 E621 API 获取图片'
-  protected endpoint = 'https://e621.net'
+  static description = "通过 E621 API 获取图片"
+  protected endpoint = "https://e621.net"
   private keyPairs: { login: string; apiKey: string }[] = []
 
   setConfig(config: Config): void {
     this.config = config
-    if (config.e621?.keyPairs?.length) {
-      this.keyPairs = config.e621.keyPairs
-    }
+    this.keyPairs = config.e621?.keyPairs || []
   }
 
   private get keyPair() {
@@ -61,98 +59,104 @@ export class E621SourceProvider extends SourceProvider {
     try {
       const keyPair = this.keyPair
 
-      let tagString = ''
-      if (props.tag) {
-        tagString = props.tag
-          .split(/[,，]/)
-          .map((t) => t.trim())
-          .filter(Boolean)
-          .join(' ')
-      }
+      const tagString = booruTags(props.tag)
 
-      const params: Record<string, any> = {
+      const params: Record<string, string | number | boolean> = {
         tags: `${tagString} order:random`,
         limit: 1
       }
 
       if (this.config.isR18 && props.r18) {
-        params.tags += ' -rating:s'
+        params.tags += " -rating:s"
       } else {
-        params.tags += ' rating:s'
+        params.tags += " rating:s"
       }
 
       const headers: Record<string, string> = {
-        'User-Agent': 'PixLuna/1.0'
+        "User-Agent": "PixLuna/1.0"
       }
 
       if (keyPair) {
         headers.Authorization =
-          'Basic ' +
-          Buffer.from(`${keyPair.login}:${keyPair.apiKey}`).toString('base64')
+          "Basic " + Buffer.from(`${keyPair.login}:${keyPair.apiKey}`).toString("base64")
       }
 
-      const res = await context.http.get<{ posts: E621Post[] }>(
-        `${this.endpoint}/posts.json`,
-        {
-          params,
-          headers,
-          proxyAgent: this.config.isProxy ? this.config.proxyHost : undefined
-        }
-      )
+      if (props.excludeAI) params.tags += " -ai_generated -ai-assisted"
+
+      const res = await context.http.get<{ posts: E621Post[] }>(`${this.endpoint}/posts.json`, {
+        params,
+        headers,
+        proxyAgent: this.config.isProxy ? this.config.proxyHost : ""
+      })
 
       if (!Array.isArray(res.posts) || res.posts.length === 0) {
         return {
-          status: 'error',
-          data: new Error('No image data returned')
+          status: "error",
+          data: new Error("No image data returned")
         }
       }
 
       const post = res.posts[0]
-      const url = this.config.imageProcessing.compress
-        ? post.sample.url
-        : post.file.url
+      const tags = Object.values(post.tags)
+        .flat()
+        .filter((tag): tag is string => typeof tag === "string")
+      if ((!this.config.isR18 || !props.r18) && !isSafeRating(post.rating)) {
+        return {
+          status: "error",
+          data: new Error("Upstream returned a restricted image for a safe request")
+        }
+      }
+      if (props.excludeAI && isAiTag(tags)) {
+        return {
+          status: "error",
+          data: new Error("Upstream returned an AI image despite exclusion")
+        }
+      }
+      if (!post.file.url) {
+        return { status: "error", data: new Error("Upstream returned no original image URL") }
+      }
+      const regularUrl = post.sample.url || post.file.url
+      const url = this.config.imageProcessing.compress ? regularUrl : post.file.url
 
       const generalImageData: GeneralImageData = {
         id: post.id,
-        title: '',
-        author: post.tags.artist.join(', '),
-        r18: post.rating !== 's',
-        tags: [...post.tags.general, ...post.tags.artist],
-        extension: post.file.url.split('.').pop(),
-        aiType: 0,
-        uploadDate: new Date(post.created_at).getTime(),
+        title: "",
+        author: post.tags.artist.join(", "),
+        r18: !isSafeRating(post.rating),
+        tags,
+        extension: imageExtension(url),
+        aiType: isAiTag(tags) ? 2 : 0,
+        uploadDate: uploadTime(post.created_at),
         urls: {
           original: post.file.url,
-          regular: post.sample.url
+          regular: regularUrl
         }
       }
 
-      logger.debug('成功获取图片元数据', { metadata: generalImageData })
-
       return {
-        status: 'success',
+        status: "success",
         data: {
           url,
           urls: {
-            regular: post.sample.url,
+            regular: regularUrl,
             original: post.file.url
           },
           raw: generalImageData
         }
       }
-    } catch (error) {
+    } catch {
       return {
-        status: 'error',
-        data: error
+        status: "error",
+        data: new Error("e621 API request failed; check upstream availability and credentials")
       }
     }
   }
 
   getMeta(): ImageSourceMeta {
     return {
-      referer: 'https://e621.net'
+      referer: "https://e621.net"
     }
   }
 }
 
-registerProvider('e621', E621SourceProvider)
+registerProvider("e621", E621SourceProvider)

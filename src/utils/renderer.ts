@@ -1,7 +1,9 @@
-import { type Context, h } from 'koishi'
-import type Config from '../config'
-import { getRemoteImage } from './request'
-import { renderImageMessage } from './messageBuilder'
+import type { Context } from "koishi"
+import type * as Koishi from "koishi"
+import type Config from "../config"
+import { getRemoteImage } from "./request"
+import { renderImageMessage } from "./messageBuilder"
+const { h } = require("koishi") as typeof Koishi
 
 export async function render(
   ctx: Context,
@@ -11,15 +13,11 @@ export async function render(
 ) {
   try {
     const image = await getRemoteImage(ctx, tag, config, specificProvider)
-
-    if (!image) {
-      return h('message', [h('text', { content: '没有获取到喵\n' })])
-    }
-
     return renderImageMessage(image, config)
   } catch (e) {
-    ctx.logger.error(e)
+    ctx.logger("pixluna").warn("图片获取失败")
 
-    return h('message', [h('text', { content: `图片获取失败了喵~，${e}` })])
+    const message = e instanceof Error ? e.message : "上游请求失败"
+    return h("message", [h("text", { content: `图片获取失败了喵~，${message}` })])
   }
 }

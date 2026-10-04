@@ -1,7 +1,7 @@
-import type { Context } from 'koishi'
-import type { Config } from '../config'
+import type { Context } from "koishi"
+import type { Config } from "../config"
 
-export type ImageMimeType = 'jpg' | 'jpeg' | 'png' | 'gif'
+export type ImageMimeType = "jpg" | "jpeg" | "png" | "gif"
 
 export interface ImageMetaData {
   url: string
@@ -40,27 +40,25 @@ export interface CommonSourceResponse {
   metaData: ImageMetaData
 }
 
-export type SourceResponseStatus = 'success' | 'error'
+export type SourceResponseStatus = "success" | "error"
 export type SourceResponse<
   T,
   U extends SourceResponseStatus = SourceResponseStatus
-> = U extends 'success'
+> = U extends "success"
   ? {
       status: U
       data: T
     }
-  : U extends 'error'
+  : U extends "error"
     ? {
         status: U
         data: Error | string | null | undefined
       }
-    : {
-        status: SourceResponseStatus
-        data: any
-      }
+    : never
 
 export interface ImageSourceMeta {
   referer?: string
+  userAgent?: string
 }
 
 export abstract class SourceProvider {
