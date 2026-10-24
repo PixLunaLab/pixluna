@@ -2,38 +2,25 @@ import type { Context } from "koishi"
 import type { Config } from "../config"
 import type { SourceProvider } from "./type"
 
-export type ProviderCtor = {
+export type ProviderConstructor = {
   new (ctx: Context, config: Config): SourceProvider
   description?: string
 }
 
 declare global {
-  var __PIXLUNA_PROVIDERS__: Map<string, ProviderCtor> | undefined
+  var __PIXLUNA_PROVIDERS__: Map<string, ProviderConstructor> | undefined
 }
 
-function ensureRegistry(): Map<string, ProviderCtor> {
-  return (globalThis.__PIXLUNA_PROVIDERS__ ??= new Map<string, ProviderCtor>())
+const providers = (globalThis.__PIXLUNA_PROVIDERS__ ??= new Map<string, ProviderConstructor>())
+
+export function registerProvider(alias: string, provider: ProviderConstructor) {
+  providers.set(alias, provider)
 }
 
-export function registerProvider(aliases: string | string[], ctor: ProviderCtor) {
-  const reg = ensureRegistry()
-  const list = Array.isArray(aliases) ? aliases : [aliases]
-  for (const raw of list) {
-    const alias = String(raw).trim()
-    if (!alias) continue
-    const existing = reg.get(alias)
-    if (!existing || existing !== ctor) {
-      reg.set(alias, ctor)
-    }
-  }
-}
-
-export function resolveProvider(name: string): ProviderCtor | undefined {
-  const reg = ensureRegistry()
-  return reg.get(name)
+export function resolveProvider(name: string): ProviderConstructor | undefined {
+  return providers.get(name)
 }
 
 export function listProviders(): string[] {
-  const reg = ensureRegistry()
-  return Array.from(reg.keys())
+  return [...providers.keys()]
 }

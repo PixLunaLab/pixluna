@@ -13,7 +13,7 @@ export async function fetchImageBuffer(
   config: Config,
   url: string,
   provider?: SourceProvider
-): Promise<[ArrayBuffer, string]> {
+): Promise<[Buffer, string]> {
   const meta = provider?.getMeta()
   const headers: Record<string, string> = { "User-Agent": meta?.userAgent || USER_AGENT }
   const referer = meta?.referer
@@ -29,9 +29,9 @@ export async function fetchImageBuffer(
     throw new Error("图片下载失败，请检查图源、代理和图片反代设置")
   }
   const buffer = Buffer.isBuffer(response) ? response : Buffer.from(response)
-  const mimeType = await detectImageFormat(buffer)
+  const mimeType = detectImageFormat(buffer)
   if (!mimeType) throw new Error("图源返回的不是支持的图片格式")
-  return [response, mimeType]
+  return [buffer, mimeType]
 }
 
 export async function getRemoteImage(
@@ -72,8 +72,7 @@ export async function downloadImage(
   metadata: ImageMetaData,
   provider: SourceProvider
 ): Promise<GeneralImageData & { data: Buffer; mimeType: string; raw: GeneralImageData }> {
-  const [buffer, mimeType] = await fetchImageBuffer(ctx, config, metadata.url, provider)
-  const original = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer)
+  const [original, mimeType] = await fetchImageBuffer(ctx, config, metadata.url, provider)
   const hasRegular =
     metadata.url === metadata.urls.regular && metadata.urls.regular !== metadata.urls.original
   const needsProcessing =
@@ -86,8 +85,8 @@ export async function downloadImage(
     if (original.byteLength >= 32 * 1024 * 1024) {
       throw new Error("图片超过 32 MiB，无法安全进行图片处理")
     }
-    data = await processImage(ctx, original, config, hasRegular)
-    const processedMimeType = await detectImageFormat(data)
+    data = await processImage(ctx, original, config)
+    const processedMimeType = detectImageFormat(data)
     if (!processedMimeType) throw new Error("图片处理结果格式无效")
     resultMimeType = processedMimeType
   }

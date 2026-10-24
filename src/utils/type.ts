@@ -77,7 +77,5 @@ export abstract class SourceProvider {
     request: CommonSourceRequest
   ): Promise<SourceResponse<ImageMetaData>>
 
-  abstract setConfig(config: Config): void
-
   abstract getMeta(): ImageSourceMeta
 }

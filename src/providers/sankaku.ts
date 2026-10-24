@@ -39,8 +39,10 @@ export class SankakuSourceProvider extends SourceProvider {
   }
 
   private get keyPair() {
-    const pairs = this.config.sankaku?.keyPairs || []
-    return pairs.length ? pairs[Math.floor(Math.random() * pairs.length)] : null
+    const pairs = this.config.sankaku?.keyPairs ?? []
+    if (!pairs.length) return null
+
+    return pairs[Math.floor(Math.random() * pairs.length)]
   }
 
   private async login(keyPair: NonNullable<Config["sankaku"]>["keyPairs"][0]) {
@@ -64,7 +66,7 @@ export class SankakuSourceProvider extends SourceProvider {
 
   async getMetaData(
     _: { context: Context },
-    props: CommonSourceRequest
+    request: CommonSourceRequest
   ): Promise<SourceResponse<ImageMetaData>> {
     try {
       const keyPair = this.keyPair
@@ -74,10 +76,12 @@ export class SankakuSourceProvider extends SourceProvider {
 
       await this.login(keyPair)
 
-      const tagString = booruTags(props.tag)
+      const tagString = booruTags(request.tag)
+      const rating = this.config.isR18 && request.r18 ? "-rating:safe" : "rating:safe"
+      const excludeAI = request.excludeAI ? "-ai_generated -ai-assisted" : ""
 
       const params = {
-        tags: `${tagString}${this.config.isR18 && props.r18 ? " -rating:safe" : " rating:safe"}${props.excludeAI ? " -ai_generated -ai-assisted" : ""}`,
+        tags: `${tagString} ${rating} ${excludeAI}`.trim(),
         limit: 1
       }
 
@@ -98,31 +102,38 @@ export class SankakuSourceProvider extends SourceProvider {
 
       const post = posts[0]
       const tags = post.tags.map((tag) => tag.name)
-      if ((!this.config.isR18 || !props.r18) && !isSafeRating(post.rating)) {
+
+      if ((!this.config.isR18 || !request.r18) && !isSafeRating(post.rating)) {
         return {
           status: "error",
           data: new Error("Upstream returned a restricted image for a safe request")
         }
       }
-      if (props.excludeAI && isAiTag(tags)) {
+
+      if (request.excludeAI && isAiTag(tags)) {
         return {
           status: "error",
           data: new Error("Upstream returned an AI image despite exclusion")
         }
       }
+
       if (!post.file_url) {
-        return { status: "error", data: new Error("Upstream returned no original image URL") }
+        return {
+          status: "error",
+          data: new Error("Upstream returned no original image URL")
+        }
       }
+
       const regularUrl = post.sample_url || post.file_url
+      const url = this.config.imageProcessing.compress ? regularUrl : post.file_url
+
       const generalImageData: GeneralImageData = {
         id: post.id,
         title: post.source || `Sankaku - ${post.id}`,
         author: post.author.name.replace(/_/g, " "),
         r18: !isSafeRating(post.rating),
         tags,
-        extension: imageExtension(
-          this.config.imageProcessing.compress ? regularUrl : post.file_url
-        ),
+        extension: imageExtension(url),
         uploadDate: uploadTime(post.created_at),
         aiType: isAiTag(tags) ? 2 : 0,
         urls: {
@@ -134,7 +145,7 @@ export class SankakuSourceProvider extends SourceProvider {
       return {
         status: "success",
         data: {
-          url: this.config.imageProcessing.compress ? regularUrl : post.file_url,
+          url,
           urls: {
             regular: regularUrl,
             original: post.file_url
@@ -154,10 +165,6 @@ export class SankakuSourceProvider extends SourceProvider {
     return {
       referer: "https://sankaku.app"
     }
-  }
-
-  setConfig(config: Config) {
-    this.config = config
   }
 }
 

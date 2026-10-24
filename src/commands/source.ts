@@ -11,9 +11,8 @@ export function commandSource(ctx: Context, _config: Config) {
     const message = h("message", [
       h("text", { content: "可用的图片来源：\n" }),
       ...availableAliases.map((alias) => {
-        const Ctor = resolveProvider(alias)
-        const desc = Ctor?.description || ""
-        return h("text", { content: `- ${alias}: ${desc}\n` })
+        const provider = resolveProvider(alias)!
+        return h("text", { content: `- ${alias}: ${provider.description ?? ""}\n` })
       })
     ])
     await session.send(message)

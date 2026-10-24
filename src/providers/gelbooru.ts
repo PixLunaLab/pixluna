@@ -1,5 +1,4 @@
 import type { Context } from "koishi"
-import type { Config } from "../config"
 import type {
   CommonSourceRequest,
   GeneralImageData,
@@ -30,15 +29,19 @@ export class GelbooruSourceProvider extends SourceProvider {
   protected endpoint = "https://gelbooru.com/index.php"
 
   private get keyPair() {
-    const pairs = this.config.gelbooru?.keyPairs || []
-    return pairs.length ? pairs[Math.floor(Math.random() * pairs.length)] : null
+    const pairs = this.config.gelbooru?.keyPairs ?? []
+    if (!pairs.length) return null
+
+    return pairs[Math.floor(Math.random() * pairs.length)]
   }
 
   async getMetaData(
     { context }: { context: Context },
-    props: CommonSourceRequest
+    request: CommonSourceRequest
   ): Promise<SourceResponse<ImageMetaData>> {
-    const tagString = booruTags(props.tag)
+    const tagString = booruTags(request.tag)
+    const rating = this.config.isR18 && request.r18 ? "-rating:general" : "rating:general"
+    const excludeAI = request.excludeAI ? "-ai_generated -ai-assisted" : ""
 
     const params = new URLSearchParams({
       page: "dapi",
@@ -46,7 +49,7 @@ export class GelbooruSourceProvider extends SourceProvider {
       q: "index",
       json: "1",
       limit: "1",
-      tags: `${tagString} sort:random${this.config.isR18 && props.r18 ? " -rating:general" : " rating:general"}${props.excludeAI ? " -ai_generated -ai-assisted" : ""}`
+      tags: `${tagString} sort:random ${rating} ${excludeAI}`.trim()
     })
 
     const keyPair = this.keyPair
@@ -55,47 +58,54 @@ export class GelbooruSourceProvider extends SourceProvider {
       params.append("user_id", keyPair.userId)
     }
 
-    const url = `${this.endpoint}?${params.toString()}`
+    const requestUrl = `${this.endpoint}?${params.toString()}`
 
     try {
-      const res = await context.http.get<GelbooruResponse>(url, {
+      const response = await context.http.get<GelbooruResponse>(requestUrl, {
         proxyAgent: this.config.isProxy ? this.config.proxyHost : ""
       })
 
-      if (!res.post?.length) {
+      if (!response.post?.length) {
         return {
           status: "error",
           data: new Error("No image data returned")
         }
       }
 
-      const post = res.post[0]
+      const post = response.post[0]
       const tags = post.tags.split(" ")
-      if ((!this.config.isR18 || !props.r18) && !isSafeRating(post.rating)) {
+
+      if ((!this.config.isR18 || !request.r18) && !isSafeRating(post.rating)) {
         return {
           status: "error",
           data: new Error("Upstream returned a restricted image for a safe request")
         }
       }
-      if (props.excludeAI && isAiTag(tags)) {
+
+      if (request.excludeAI && isAiTag(tags)) {
         return {
           status: "error",
           data: new Error("Upstream returned an AI image despite exclusion")
         }
       }
+
       if (!post.file_url) {
-        return { status: "error", data: new Error("Upstream returned no original image URL") }
+        return {
+          status: "error",
+          data: new Error("Upstream returned no original image URL")
+        }
       }
+
       const regularUrl = post.sample_url || post.file_url
+      const url = this.config.imageProcessing.compress ? regularUrl : post.file_url
+
       const generalImageData: GeneralImageData = {
         id: post.id,
         title: post.source || `Gelbooru - ${post.id}`,
         author: post.owner.replace(/_/g, " "),
         r18: !isSafeRating(post.rating),
         tags,
-        extension: imageExtension(
-          this.config.imageProcessing.compress ? regularUrl : post.file_url
-        ),
+        extension: imageExtension(url),
         uploadDate: uploadTime(post.created_at),
         aiType: isAiTag(tags) ? 2 : 0,
         urls: {
@@ -107,7 +117,7 @@ export class GelbooruSourceProvider extends SourceProvider {
       return {
         status: "success",
         data: {
-          url: this.config.imageProcessing.compress ? regularUrl : post.file_url,
+          url,
           urls: {
             regular: regularUrl,
             original: post.file_url
@@ -127,10 +137,6 @@ export class GelbooruSourceProvider extends SourceProvider {
     return {
       referer: "https://gelbooru.com/"
     }
-  }
-
-  setConfig(config: Config) {
-    this.config = config
   }
 }
 

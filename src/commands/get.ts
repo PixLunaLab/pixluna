@@ -15,7 +15,7 @@ export function commandGet(ctx: Context, config: Config) {
     .action(async ({ session, options = {} }, pid) => {
       if (!session) return
       if (config.messageBefore) await session.send(config.messageBefore)
-      const message = await getPixivImageByID(ctx, config, session.userId || "", {
+      const message = await getPixivImageByID(ctx, config, session.userId ?? "", {
         pid,
         page: options.pages ?? 0,
         all: options.all

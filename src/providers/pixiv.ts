@@ -90,7 +90,6 @@ interface OAuthResponse {
   user?: { id: string | number }
 }
 interface TokenState {
-  credential: string
   refreshToken: string
   accessToken?: string
   expiresAt: number
@@ -105,28 +104,33 @@ function keywords(tag?: string): string[] {
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean)
 }
+
 function restricted(xRestrict: number, tags: string[]): boolean {
   return xRestrict > 0 || tags.some((tag) => /^r-?18(?:g)?$/i.test(tag))
 }
-function matches(artwork: Artwork, props: CommonSourceRequest, config: Config): boolean {
-  if (artwork.restricted !== (config.isR18 && props.r18 === true)) return false
-  if ((props.excludeAI ?? config.excludeAI) && artwork.aiType === 2) return false
-  return keywords(props.tag).every(
+
+function matches(artwork: Artwork, request: CommonSourceRequest, config: Config): boolean {
+  if (artwork.restricted !== (config.isR18 && request.r18 === true)) return false
+  if ((request.excludeAI ?? config.excludeAI) && artwork.aiType === 2) return false
+
+  return keywords(request.tag).every(
     (word) =>
       artwork.title.toLowerCase().includes(word) ||
       artwork.tags.some((tag) => tag.toLowerCase().includes(word))
   )
 }
+
 function failure(message: string): SourceResponse<ImageMetaData> {
   return { status: "error", data: new Error(message) }
 }
+
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Pixiv 请求失败"
 }
 
 abstract class PixivBaseProvider extends SourceProvider {
   protected get tokenMode(): boolean {
-    return !!this.config.pixiv.refreshToken?.trim()
+    return !!this.config.pixiv.refreshToken.trim()
   }
 
   protected async pause(iteration: number): Promise<void> {
@@ -134,7 +138,7 @@ abstract class PixivBaseProvider extends SourceProvider {
   }
 
   protected async token(context: Context): Promise<TokenState> {
-    const credential = this.config.pixiv.refreshToken?.trim()
+    const credential = this.config.pixiv.refreshToken.trim()
     if (!credential) throw new Error("未设置 Pixiv refresh token")
     let credentials = tokens.get(context)
     if (!credentials) {
@@ -143,7 +147,7 @@ abstract class PixivBaseProvider extends SourceProvider {
     }
     let state = credentials.get(credential)
     if (!state) {
-      state = { credential, refreshToken: credential, expiresAt: 0 }
+      state = { refreshToken: credential, expiresAt: 0 }
       credentials.set(credential, state)
     }
     if (state.pending) return state.pending
@@ -196,14 +200,15 @@ abstract class PixivBaseProvider extends SourceProvider {
   }
 
   protected async web<T>(context: Context, path: string): Promise<T> {
-    if (!this.config.pixiv.phpSESSID?.trim()) throw new Error("未设置 Pixiv PHPSESSID")
+    const sessionId = this.config.pixiv.phpSESSID.trim()
+    if (!sessionId) throw new Error("未设置 Pixiv PHPSESSID")
     let result: WebResponse<T>
     try {
       result = await context.http.get<WebResponse<T>>(`https://www.pixiv.net/ajax/${path}`, {
         headers: {
           Referer: "https://www.pixiv.net/",
           "User-Agent": USER_AGENT,
-          Cookie: `PHPSESSID=${this.config.pixiv.phpSESSID.trim()}`
+          Cookie: `PHPSESSID=${sessionId}`
         },
         proxyAgent: this.config.isProxy ? this.config.proxyHost : ""
       })
@@ -238,7 +243,7 @@ abstract class PixivBaseProvider extends SourceProvider {
     const pages = value.meta_pages?.length
       ? value.meta_pages.map((page) => page.image_urls.original)
       : [value.meta_single_page?.original_image_url || ""]
-    if (!pages.length || pages.some((page) => !page) || pages.length !== value.page_count) {
+    if (pages.some((page) => !page) || pages.length !== value.page_count) {
       throw new Error("Pixiv 未返回完整原图页列表")
     }
     const tags = value.tags.map((tag) => tag.name)
@@ -286,7 +291,7 @@ abstract class PixivBaseProvider extends SourceProvider {
     const url = new URL(value.pages[page])
     if (url.protocol !== "https:" || url.hostname !== "i.pximg.net")
       throw new Error("Pixiv 返回了无效的原图地址")
-    const base = this.config.baseUrl?.trim()
+    const base = this.config.baseUrl.trim()
     let original = url.href
     if (base) {
       const replacement = new URL(base.includes("://") ? base : `https://${base}`)
@@ -308,18 +313,15 @@ abstract class PixivBaseProvider extends SourceProvider {
     return { url: original, urls: raw.urls, raw }
   }
 
-  protected select(values: AppIllust[], props: CommonSourceRequest): ImageMetaData | undefined {
+  protected select(values: AppIllust[], request: CommonSourceRequest): ImageMetaData | undefined {
     for (const value of shuffleArray(values)) {
       if (value.type === "ugoira") continue
       const artwork = this.fromApp(value)
-      if (matches(artwork, props, this.config)) return this.metadata(artwork)
+      if (matches(artwork, request, this.config)) return this.metadata(artwork)
     }
     return undefined
   }
 
-  setConfig(config: Config): void {
-    this.config = config
-  }
   getMeta(): ImageSourceMeta {
     return { referer: "https://www.pixiv.net/" }
   }
@@ -330,11 +332,11 @@ export class PixivDiscoverySourceProvider extends PixivBaseProvider {
 
   async getMetaData(
     { context }: { context: Context },
-    props: CommonSourceRequest
+    request: CommonSourceRequest
   ): Promise<SourceResponse<ImageMetaData>> {
     try {
       if (this.tokenMode) {
-        const words = keywords(props.tag)
+        const words = keywords(request.tag)
         const query = new URLSearchParams(
           words.length
             ? {
@@ -345,27 +347,35 @@ export class PixivDiscoverySourceProvider extends PixivBaseProvider {
               }
             : { content_type: "illust", filter: "for_ios", include_ranking_label: "true" }
         )
-        if (props.excludeAI ?? this.config.excludeAI) query.set("search_ai_type", "0")
-        const result = await this.app(
-          context,
-          `${words.length ? "/v1/search/illust" : "/v1/illust/recommended"}?${query}`
-        )
+        const endpoint = words.length ? "/v1/search/illust" : "/v1/illust/recommended"
+
+        if (request.excludeAI ?? this.config.excludeAI) query.set("search_ai_type", "0")
+
+        const result = await this.app(context, `${endpoint}?${query}`)
+
         if (!Array.isArray(result.illusts)) throw new Error("Pixiv 未返回插画列表")
-        const selected = this.select(result.illusts, props)
+
+        const selected = this.select(result.illusts, request)
         return selected
           ? { status: "success", data: selected }
           : failure("未找到符合全部关键词、分级和 AI 条件的插画")
       }
+
+      const mode = this.config.isR18 && request.r18 ? "r18" : "all"
       const result = await this.web<{ illusts: { id: string }[] }>(
         context,
-        `illust/discovery?mode=${this.config.isR18 && props.r18 ? "r18" : "all"}&limit=20`
+        `illust/discovery?mode=${mode}&limit=20`
       )
+
       for (const [index, value] of shuffleArray(result.illusts).entries()) {
         await this.pause(index)
         const artwork = await this.detail(context, value.id)
-        if (artwork && matches(artwork, props, this.config))
+
+        if (artwork && matches(artwork, request, this.config)) {
           return { status: "success", data: this.metadata(artwork) }
+        }
       }
+
       return failure("未找到符合全部关键词、分级和 AI 条件的插画")
     } catch (error) {
       return failure(errorMessage(error))
@@ -378,7 +388,7 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
 
   async getMetaData(
     { context }: { context: Context },
-    props: CommonSourceRequest = {}
+    request: CommonSourceRequest = {}
   ): Promise<SourceResponse<ImageMetaData>> {
     try {
       const users: string[] = []
@@ -397,7 +407,7 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
           path = result.next_url
         }
       } else {
-        const userId = this.config.pixiv.userId?.trim()
+        const userId = this.config.pixiv.userId.trim()
         if (!userId || !/^[1-9]\d*$/.test(userId)) throw new Error("未设置有效 Pixiv 用户 ID")
         for (let offset = 0; ; offset += 100) {
           await this.pause(offset)
@@ -423,7 +433,7 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
             await this.pause(visited.size - 1)
             const result = await this.app(context, path)
             if (!Array.isArray(result.illusts)) throw new Error("Pixiv 未返回画师作品列表")
-            const selected = this.select(result.illusts, props)
+            const selected = this.select(result.illusts, request)
             if (selected) return { status: "success", data: selected }
             path = result.next_url
           }
@@ -435,11 +445,14 @@ export class PixivFollowingSourceProvider extends PixivBaseProvider {
           const ids = [
             ...new Set([...Object.keys(profile.illusts || {}), ...Object.keys(profile.manga || {})])
           ]
+
           for (const [artIndex, id] of shuffleArray(ids).entries()) {
             await this.pause(artIndex)
             const artwork = await this.detail(context, id)
-            if (artwork && matches(artwork, props, this.config))
+
+            if (artwork && matches(artwork, request, this.config)) {
               return { status: "success", data: this.metadata(artwork) }
+            }
           }
         }
       }
@@ -454,9 +467,13 @@ export class PixivGetByIDProvider extends PixivBaseProvider {
   static description = "通过作品ID获取Pixiv图片"
 
   private checkDirect(artwork: Artwork): void {
-    if (!this.config.isR18 && artwork.restricted) throw new Error("当前配置禁止获取 R18 作品")
-    if (this.config.excludeAI && artwork.aiType === 2)
+    if (!this.config.isR18 && artwork.restricted) {
+      throw new Error("当前配置禁止获取 R18 作品")
+    }
+
+    if (this.config.excludeAI && artwork.aiType === 2) {
       throw new Error("当前配置禁止获取 AI 生成作品")
+    }
   }
 
   async getImageByPid(
@@ -465,7 +482,6 @@ export class PixivGetByIDProvider extends PixivBaseProvider {
     page = 0
   ): Promise<SourceResponse<ImageMetaData>> {
     try {
-      if (!Number.isInteger(page) || page < 0) throw new Error("页码必须是非负整数")
       const artwork = await this.detail(context, pid)
       if (!artwork) throw new Error("暂不支持 Pixiv 动图作品")
       this.checkDirect(artwork)
@@ -492,7 +508,6 @@ export class PixivGetByIDProvider extends PixivBaseProvider {
     userId: string,
     options: { pid: string; page: number }
   ): Promise<string | Element> {
-    if (!options.pid) return createAtMessage(userId, "请提供作品 ID (PID)")
     try {
       return renderImageMessage(
         await this.getImageWithBuffer(options.pid, options.page),
@@ -507,7 +522,6 @@ export class PixivGetByIDProvider extends PixivBaseProvider {
     userId: string,
     options: { pid: string; page: number }
   ): Promise<string | Element> {
-    if (!options.pid) return createAtMessage(userId, "请提供作品 ID (PID)")
     try {
       const artwork = await this.detail(this.ctx, options.pid)
       if (!artwork) throw new Error("暂不支持 Pixiv 动图作品")
@@ -515,7 +529,8 @@ export class PixivGetByIDProvider extends PixivBaseProvider {
       const images: (GeneralImageData & { data: Buffer; mimeType: string })[] = []
       for (let page = 0; page < artwork.pages.length; page++) {
         await this.pause(page)
-        images.push(await downloadImage(this.ctx, this.config, this.metadata(artwork, page), this))
+        const metadata = this.metadata(artwork, page)
+        images.push(await downloadImage(this.ctx, this.config, metadata, this))
       }
       return images.length === 1
         ? renderImageMessage(images[0], this.config)

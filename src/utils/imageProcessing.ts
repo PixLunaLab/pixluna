@@ -2,7 +2,7 @@ import type { Context } from "koishi"
 import type Config from "../config"
 import Vips from "wasm-vips"
 
-export async function detectImageFormat(buffer: Buffer): Promise<string | null> {
+export function detectImageFormat(buffer: Buffer): string | null {
   if (buffer.length < 12) return null
 
   // JPEG: FF D8 FF
@@ -40,11 +40,9 @@ export async function detectImageFormat(buffer: Buffer): Promise<string | null> 
   }
 
   // AVIF: ... 66 74 79 70 61 76 69 66
-  if (buffer.length >= 12) {
-    const avifCheck = buffer.subarray(4, 12).toString("ascii")
-    if (avifCheck === "ftypavif" || avifCheck === "ftypavis") {
-      return "image/avif"
-    }
+  const format = buffer.subarray(4, 12).toString("ascii")
+  if (format === "ftypavif" || format === "ftypavis") {
+    return "image/avif"
   }
 
   return null
@@ -60,28 +58,14 @@ function getVips() {
   }))
 }
 
-function getPngDeflateLevel(config: Config): number {
-  return Math.max(0, Math.min(9, config.imageProcessing.compressionLevel ?? 6))
-}
-
-function mapFlipMode(mode: Config["imageProcessing"]["flipMode"]): number {
-  switch (mode) {
-    case "horizontal":
-      return 1
-    case "vertical":
-      return 2
-    case "both":
-      return 3
-    default:
-      return 0
-  }
+function getCompressionLevel(config: Config): number {
+  return Math.max(0, Math.min(9, config.imageProcessing.compressionLevel))
 }
 
 export async function processImage(
   ctx: Context,
   imageBuffer: Buffer,
-  config: Config,
-  _hasRegularUrl: boolean
+  config: Config
 ): Promise<Buffer> {
   const vips = await getVips()
   let image: Vips.Image | null = null
@@ -95,19 +79,14 @@ export async function processImage(
     let processedImage = image
 
     if (config.imageProcessing.isFlip) {
-      const flipMode = mapFlipMode(config.imageProcessing.flipMode)
-      if (flipMode === 1) {
+      const { flipMode } = config.imageProcessing
+      if (flipMode === "horizontal" || flipMode === "both") {
         const flipped = processedImage.flipHor()
         intermediateImages.push(flipped)
         processedImage = flipped
-      } else if (flipMode === 2) {
+      }
+      if (flipMode === "vertical" || flipMode === "both") {
         const flipped = processedImage.flipVer()
-        intermediateImages.push(flipped)
-        processedImage = flipped
-      } else if (flipMode === 3) {
-        const flippedH = processedImage.flipHor()
-        intermediateImages.push(flippedH)
-        const flipped = flippedH.flipVer()
         intermediateImages.push(flipped)
         processedImage = flipped
       }
@@ -131,18 +110,18 @@ export async function processImage(
       processedImage = confused
     }
 
-    const level = getPngDeflateLevel(config)
+    const level = getCompressionLevel(config)
     const out = config.imageProcessing.compress
       ? processedImage.writeToBuffer(".webp", { Q: 100 - level * 8 })
       : processedImage.writeToBuffer(".png", { compression: level })
     return Buffer.from(out)
-  } catch (err) {
+  } catch (error) {
     ctx.logger("pixluna").warn("图片处理失败")
-    throw err instanceof Error ? err : new Error("图片处理失败")
+    throw error instanceof Error ? error : new Error("图片处理失败")
   } finally {
     for (let i = intermediateImages.length - 1; i >= 0; i--) {
-      intermediateImages[i]?.[Symbol.dispose]?.()
+      intermediateImages[i][Symbol.dispose]()
     }
-    if (image) image[Symbol.dispose]?.()
+    image?.[Symbol.dispose]()
   }
 }

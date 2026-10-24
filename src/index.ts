@@ -36,7 +36,7 @@ export function apply(ctx: Context, config: Config) {
       if (options.source && !resolveProvider(options.source)) {
         return createAtMessage(session.userId, `未找到提供程序：${options.source}`)
       }
-      if (!options.source && !config.defaultSourceProvider?.length) {
+      if (!options.source && !config.defaultSourceProvider.length) {
         return createAtMessage(session.userId, "未配置任何图片来源")
       }
       if (config.messageBefore) {

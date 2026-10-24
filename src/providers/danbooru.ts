@@ -1,5 +1,4 @@
 import type { Context } from "koishi"
-import type { Config } from "../config"
 import {
   type CommonSourceRequest,
   type GeneralImageData,
@@ -28,26 +27,21 @@ interface DanbooruPost {
 export class DanbooruSourceProvider extends SourceProvider {
   static description = "通过 Danbooru API 获取图片"
   protected endpoint = "https://danbooru.donmai.us"
-  private keyPairs: { login: string; apiKey: string }[] = []
-
-  setConfig(config: Config): void {
-    this.config = config
-    this.keyPairs = config.danbooru?.keyPairs || []
-  }
-
   private get keyPair() {
-    if (!this.keyPairs.length) return null
-    return this.keyPairs[Math.floor(Math.random() * this.keyPairs.length)]
+    const pairs = this.config.danbooru?.keyPairs ?? []
+    if (!pairs.length) return null
+
+    return pairs[Math.floor(Math.random() * pairs.length)]
   }
 
   async getMetaData(
     { context }: { context: Context },
-    props: CommonSourceRequest
+    request: CommonSourceRequest
   ): Promise<SourceResponse<ImageMetaData>> {
     try {
       const keyPair = this.keyPair
-
-      const tagString = booruTags(props.tag)
+      const tagString = booruTags(request.tag)
+      const wantsR18 = this.config.isR18 && request.r18
 
       const params: Record<string, string | number | boolean> = {
         tags: tagString,
@@ -56,44 +50,46 @@ export class DanbooruSourceProvider extends SourceProvider {
         ...(keyPair ? { login: keyPair.login, api_key: keyPair.apiKey } : {})
       }
 
-      if (this.config.isR18 && props.r18) {
-        params.tags += " rating:explicit"
-      } else {
-        params.tags += " rating:general"
-      }
+      params.tags += wantsR18 ? " rating:explicit" : " rating:general"
+      if (request.excludeAI) params.tags += " -ai-generated"
 
-      if (props.excludeAI) params.tags += " -ai-generated"
-
-      const res = await context.http.get<DanbooruPost[]>(`${this.endpoint}/posts.json`, {
+      const response = await context.http.get<DanbooruPost[]>(`${this.endpoint}/posts.json`, {
         params,
         headers: { "User-Agent": CLIENT_USER_AGENT },
         proxyAgent: this.config.isProxy ? this.config.proxyHost : ""
       })
 
-      if (!Array.isArray(res) || res.length === 0) {
+      if (!Array.isArray(response) || response.length === 0) {
         return {
           status: "error",
           data: new Error("No image data returned")
         }
       }
 
-      const post = res[0]
+      const post = response[0]
       const tags = post.tag_string.split(" ")
-      if ((!this.config.isR18 || !props.r18) && !["g", "general"].includes(post.rating)) {
+
+      if (!wantsR18 && !["g", "general"].includes(post.rating)) {
         return {
           status: "error",
           data: new Error("Upstream returned a restricted image for a safe request")
         }
       }
-      if (props.excludeAI && isAiTag(tags)) {
+
+      if (request.excludeAI && isAiTag(tags)) {
         return {
           status: "error",
           data: new Error("Upstream returned an AI image despite exclusion")
         }
       }
+
       if (!post.file_url) {
-        return { status: "error", data: new Error("Upstream returned no original image URL") }
+        return {
+          status: "error",
+          data: new Error("Upstream returned no original image URL")
+        }
       }
+
       const regularUrl = post.large_file_url || post.file_url
       const url = this.config.imageProcessing.compress ? regularUrl : post.file_url
 

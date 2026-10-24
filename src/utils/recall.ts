@@ -19,7 +19,7 @@ export async function setupAutoRecall(
   timeout: number = 60000
 ) {
   const channelId = session.channelId
-  if (!messageIds?.length || !channelId) return
+  if (!messageIds.length || !channelId) return
 
   const logger = ctx.logger("recall")
   logger.debug("设置消息自动撤回", {

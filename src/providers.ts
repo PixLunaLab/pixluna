@@ -19,9 +19,7 @@ export function getProvider(
   config: Config,
   specificProvider?: string
 ): SourceProvider {
-  const providers = config.defaultSourceProvider
-  const selectedProvider =
-    specificProvider || (Array.isArray(providers) ? shuffleArray(providers)[0] : providers)
+  const selectedProvider = specificProvider || shuffleArray(config.defaultSourceProvider)[0]
   if (!selectedProvider) {
     throw new Error("未配置任何图片来源")
   }
@@ -29,7 +27,5 @@ export function getProvider(
   if (!ProviderClass) {
     throw new Error(`未找到提供程序：${selectedProvider}`)
   }
-  const provider = new ProviderClass(ctx, config)
-  provider.setConfig(config)
-  return provider
+  return new ProviderClass(ctx, config)
 }

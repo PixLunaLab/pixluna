@@ -1,5 +1,4 @@
 import type { Context } from "koishi"
-import type { Config } from "../config"
 import {
   type CommonSourceRequest,
   type GeneralImageData,
@@ -27,7 +26,6 @@ interface YandePost {
 export class YandeSourceProvider extends SourceProvider {
   static description = "通过 Yande.re API 获取图片"
   protected endpoint = "https://yande.re"
-  private keyPairs: { login: string; password: string }[] = []
 
   private hashPassword(password: string): string {
     const salted = `choujin-steiner--${password}--`
@@ -36,14 +34,10 @@ export class YandeSourceProvider extends SourceProvider {
     return hash.digest("hex")
   }
 
-  setConfig(config: Config): void {
-    this.config = config
-    this.keyPairs = config.yande?.keyPairs || []
-  }
-
   private get keyPair() {
-    if (!this.keyPairs.length) return null
-    const key = this.keyPairs[Math.floor(Math.random() * this.keyPairs.length)]
+    const pairs = this.config.yande?.keyPairs ?? []
+    if (!pairs.length) return null
+    const key = pairs[Math.floor(Math.random() * pairs.length)]
     return {
       login: key.login,
       password_hash: this.hashPassword(key.password)
@@ -52,12 +46,12 @@ export class YandeSourceProvider extends SourceProvider {
 
   async getMetaData(
     { context }: { context: Context },
-    props: CommonSourceRequest
+    request: CommonSourceRequest
   ): Promise<SourceResponse<ImageMetaData>> {
     try {
       const keyPair = this.keyPair
-
-      const tagString = booruTags(props.tag)
+      const tagString = booruTags(request.tag)
+      const wantsR18 = this.config.isR18 && request.r18
 
       const params: Record<string, string | number | boolean> = {
         tags: `${tagString} order:random`,
@@ -70,43 +64,45 @@ export class YandeSourceProvider extends SourceProvider {
           : {})
       }
 
-      if (this.config.isR18 && props.r18) {
-        params.tags += " rating:explicit"
-      } else {
-        params.tags += " rating:safe"
-      }
+      params.tags += wantsR18 ? " rating:explicit" : " rating:safe"
+      if (request.excludeAI) params.tags += " -ai_generated -ai-assisted"
 
-      if (props.excludeAI) params.tags += " -ai_generated -ai-assisted"
-
-      const res = await context.http.get<YandePost[]>(`${this.endpoint}/post.json`, {
+      const response = await context.http.get<YandePost[]>(`${this.endpoint}/post.json`, {
         params,
         proxyAgent: this.config.isProxy ? this.config.proxyHost : ""
       })
 
-      if (!Array.isArray(res) || res.length === 0) {
+      if (!Array.isArray(response) || response.length === 0) {
         return {
           status: "error",
           data: new Error("No image data returned")
         }
       }
 
-      const post = res[0]
+      const post = response[0]
       const tags = post.tags.split(" ")
-      if ((!this.config.isR18 || !props.r18) && !isSafeRating(post.rating)) {
+
+      if (!wantsR18 && !isSafeRating(post.rating)) {
         return {
           status: "error",
           data: new Error("Upstream returned a restricted image for a safe request")
         }
       }
-      if (props.excludeAI && isAiTag(tags)) {
+
+      if (request.excludeAI && isAiTag(tags)) {
         return {
           status: "error",
           data: new Error("Upstream returned an AI image despite exclusion")
         }
       }
+
       if (!post.file_url) {
-        return { status: "error", data: new Error("Upstream returned no original image URL") }
+        return {
+          status: "error",
+          data: new Error("Upstream returned no original image URL")
+        }
       }
+
       const regularUrl = post.sample_url || post.file_url
       const url = this.config.imageProcessing.compress ? regularUrl : post.file_url
 

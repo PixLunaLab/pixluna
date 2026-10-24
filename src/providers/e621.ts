@@ -1,5 +1,4 @@
 import type { Context } from "koishi"
-import type { Config } from "../config"
 import {
   type CommonSourceRequest,
   type GeneralImageData,
@@ -40,81 +39,81 @@ interface E621Post {
 export class E621SourceProvider extends SourceProvider {
   static description = "通过 E621 API 获取图片"
   protected endpoint = "https://e621.net"
-  private keyPairs: { login: string; apiKey: string }[] = []
-
-  setConfig(config: Config): void {
-    this.config = config
-    this.keyPairs = config.e621?.keyPairs || []
-  }
-
   private get keyPair() {
-    if (!this.keyPairs.length) return null
-    return this.keyPairs[Math.floor(Math.random() * this.keyPairs.length)]
+    const pairs = this.config.e621?.keyPairs ?? []
+    if (!pairs.length) return null
+
+    return pairs[Math.floor(Math.random() * pairs.length)]
   }
 
   async getMetaData(
     { context }: { context: Context },
-    props: CommonSourceRequest
+    request: CommonSourceRequest
   ): Promise<SourceResponse<ImageMetaData>> {
     try {
       const keyPair = this.keyPair
-
-      const tagString = booruTags(props.tag)
+      const tagString = booruTags(request.tag)
+      const wantsR18 = this.config.isR18 && request.r18
 
       const params: Record<string, string | number | boolean> = {
         tags: `${tagString} order:random`,
         limit: 1
       }
 
-      if (this.config.isR18 && props.r18) {
-        params.tags += " -rating:s"
-      } else {
-        params.tags += " rating:s"
-      }
+      params.tags += wantsR18 ? " -rating:s" : " rating:s"
+      if (request.excludeAI) params.tags += " -ai_generated -ai-assisted"
 
       const headers: Record<string, string> = {
         "User-Agent": "PixLuna/1.0"
       }
 
       if (keyPair) {
-        headers.Authorization =
-          "Basic " + Buffer.from(`${keyPair.login}:${keyPair.apiKey}`).toString("base64")
+        const credentials = `${keyPair.login}:${keyPair.apiKey}`
+        headers.Authorization = "Basic " + Buffer.from(credentials).toString("base64")
       }
 
-      if (props.excludeAI) params.tags += " -ai_generated -ai-assisted"
+      const response = await context.http.get<{ posts: E621Post[] }>(
+        `${this.endpoint}/posts.json`,
+        {
+          params,
+          headers,
+          proxyAgent: this.config.isProxy ? this.config.proxyHost : ""
+        }
+      )
 
-      const res = await context.http.get<{ posts: E621Post[] }>(`${this.endpoint}/posts.json`, {
-        params,
-        headers,
-        proxyAgent: this.config.isProxy ? this.config.proxyHost : ""
-      })
-
-      if (!Array.isArray(res.posts) || res.posts.length === 0) {
+      if (!Array.isArray(response.posts) || response.posts.length === 0) {
         return {
           status: "error",
           data: new Error("No image data returned")
         }
       }
 
-      const post = res.posts[0]
+      const post = response.posts[0]
       const tags = Object.values(post.tags)
         .flat()
         .filter((tag): tag is string => typeof tag === "string")
-      if ((!this.config.isR18 || !props.r18) && !isSafeRating(post.rating)) {
+
+      if (!wantsR18 && !isSafeRating(post.rating)) {
         return {
           status: "error",
           data: new Error("Upstream returned a restricted image for a safe request")
         }
       }
-      if (props.excludeAI && isAiTag(tags)) {
+
+      if (request.excludeAI && isAiTag(tags)) {
         return {
           status: "error",
           data: new Error("Upstream returned an AI image despite exclusion")
         }
       }
+
       if (!post.file.url) {
-        return { status: "error", data: new Error("Upstream returned no original image URL") }
+        return {
+          status: "error",
+          data: new Error("Upstream returned no original image URL")
+        }
       }
+
       const regularUrl = post.sample.url || post.file.url
       const url = this.config.imageProcessing.compress ? regularUrl : post.file.url
 
